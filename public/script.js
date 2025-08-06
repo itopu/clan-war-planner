@@ -82,7 +82,7 @@ $(document).ready(async function () {
         clanRes.members.items.forEach(member => {
             trophyMap[member.tag] = member.trophies || 0;
         });
-        
+
         myClan.members.forEach(member => {
             member.trophies = trophyMap[member.tag] || 0;
         });
@@ -105,12 +105,10 @@ $(document).ready(async function () {
 
             // 🏆 Trophy column with image
             const trophyImage = trophyBadge(member.trophies || 0);
-            const trophyHtml = `
-                <td class="p-2 border">
-                    <img src="${trophyImage}" alt="trophy" class="inline w-5 mr-1" />
-                    ${member.trophies || '-'}
-                </td>
-            `;
+            const trophyHtml = `<span>
+                <img src="${trophyImage}" alt="trophy" class="inline w-8 mr-1" />
+                ${member.trophies || '-'}
+            </span>`;
 
             let attackInfo = '—';
             if (member.attacks?.length > 0) {
@@ -120,8 +118,8 @@ $(document).ready(async function () {
 
             const playerRow = `
                 <tr class="border">
-                    <td class="p-2 border">${member.name}</td>
-                    <td class="p-2 border">${trophyHtml}</td>
+                    <td class="p-2 border text-lg font-semibold">${member.name}</td>
+                    <td class="p-2 border text-lg font-semibold">${trophyHtml}</td>
                     <td class="p-2 border">${member.normalizedPosition || '-'}</td>
                     <td class="p-2 border">${attackInfo || '-'}</td>
                     <td class="p-2 border">
