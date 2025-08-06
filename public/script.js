@@ -18,7 +18,7 @@ $('#loadAPIBtn').on('click', () => {
     // Encode the URL to be safe for query parameter
     let encodedUrl = encodeURIComponent(apiUrl);
 
-    $.get(`/api/test?url=${encodedUrl}`, (response) => {
+    $.get(`/api/test?url=${apiUrl}`, (response) => {
         console.log('API Response:', response);
     }).fail((err) => {
         console.error('API Error:', err.responseJSON || err);
