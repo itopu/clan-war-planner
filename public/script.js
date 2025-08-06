@@ -41,7 +41,7 @@ $(document).ready(async function () {
             let attackPlan = [];
             try {
                 const data = await $.getJSON('/api/attack-strategy');
-                
+
                 console.log(data);
 
                 if (Array.isArray(data)) {
@@ -110,7 +110,7 @@ $(document).ready(async function () {
             // 🏆 Trophy column with image
             const trophyImage = trophyBadge(member.trophies || 0);
             const trophyHtml = `<span>
-                <img src="${trophyImage}" alt="trophy" class="inline w-${ member.trophies > 4900 ? '10' : '8' } mr-1" />
+                <img src="${trophyImage}" alt="trophy" class="inline w-${member.trophies > 4900 ? '10' : '8'} mr-1" />
                 ${member.trophies || '-'}
             </span>`;
 
@@ -132,14 +132,14 @@ $(document).ready(async function () {
                         <option value="">Select</option>
                         ${generateEnemyOptions(enemyClan)}
                     </select>`;
-                
+
                 attackNoteField = `<td class="p-2 border text-lg font-semibold">
                     <input type="text" name="attack_note_1" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
                 </td>`;
             } else {
                 $('#plannerWrapper table .attack-note-1').text('Attack #1 Note');
                 $('#plannerWrapper table .attack-note-2').show();
-                
+
                 attackEnemeySelect = `<select name="enemy_select_1" class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
                         <option value="">Select</option>
                         ${generateEnemyOptions(enemyClan)}
@@ -148,7 +148,7 @@ $(document).ready(async function () {
                         <option value="">Select</option>
                         ${generateEnemyOptions(enemyClan)}
                     </select>`;
-                
+
                 attackNoteField = `<td class="p-2 border text-lg font-semibold">
                     <input type="text" name="attack_note_1" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
                 </td>
@@ -199,13 +199,21 @@ $(document).ready(async function () {
             const note1 = $(this).find('.note-1').val();
             const note2 = $(this).find('.note-2').val();
 
+            if (!tag) return; // skip if tag is not found
+
             data.push({ tag, enemyBase1, enemyBase2, note1, note2 });
         });
-        
+
         console.log(data);
 
         try {
-            await $.post('/api/attack-strategy', data);
+            await $.ajax({
+                url: '/api/attack-strategy',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+            });
+            console.log("Saved successfully");
         } catch (err) {
             console.error('Failed to save strategy', err);
         }

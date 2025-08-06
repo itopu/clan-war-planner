@@ -91,16 +91,13 @@ app.get('/api/currentwar', async (req, res) => {
 
 app.post('/api/attack-strategy', (req, res) => {
     try {
-        console.log('Saving strategy:', req.body); // Debug log
-        
+        console.log('Saving strategy:', req.body); // Should log array of objects with tag, enemyBase1, etc.
         fs.writeFileSync(ATTACK_STRATEGY, JSON.stringify(req.body, null, 2));
         res.json({ message: 'Saved successfully' });
     } catch (err) {
-        console.error('Write failed:', err);
         res.status(500).json({ error: 'Failed to save' });
     }
 });
-
 
 app.get('/api/attack-strategy', (req, res) => {
     try {
