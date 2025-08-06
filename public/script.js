@@ -154,10 +154,9 @@ $(document).ready(async function () {
             }
 
             const playerRow = `
-                <tr class="border">
-                    <td class="p-2 border text-lg font-semibold">${member.name}</td>
+                <tr class="border border-2">
+                    <td class="p-2 border text-lg font-semibold">#${member.normalizedPosition || '-' + ' ' + member.name}</td>
                     <td class="p-2 border text-lg font-semibold">${trophyHtml}</td>
-                    <td class="p-2 border text-lg font-semibold">${member.normalizedPosition || '-'}</td>
                     <td class="p-2 border text-lg font-semibold">${attackInfo || '-'}</td>
                     <td class="p-2 border text-lg font-semibold">${attackEnemeySelect}</td>
                     ${attackNoteField}
