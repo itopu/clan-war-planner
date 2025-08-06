@@ -1,100 +1,75 @@
-const trophyBadge = (trophies) => {
-    if (trophies >= 5000) return "https://static.clashofclans.com/img/badges/league-legend.png";
-    if (trophies >= 4700) return "https://static.clashofclans.com/img/badges/league-titan-1.png";
-    if (trophies >= 4400) return "https://static.clashofclans.com/img/badges/league-titan-2.png";
-    if (trophies >= 4100) return "https://static.clashofclans.com/img/badges/league-titan-3.png";
-    if (trophies >= 3800) return "https://static.clashofclans.com/img/badges/league-champion-1.png";
-    if (trophies >= 3500) return "https://static.clashofclans.com/img/badges/league-champion-2.png";
-    if (trophies >= 3200) return "https://static.clashofclans.com/img/badges/league-champion-3.png";
-    return "https://static.clashofclans.com/img/badges/league-crystal-3.png";
-};
+async function loadClanAndWar() {
+    try {
+        const res = await $.get('/api/auto-load');
+        const warData = res.data;
+        const isCWL = res.type === 'cwl';
 
-// Load and save clan tag
-$('#loadClanBtn').on('click', () => {
-    let tag = $('#clanTagInput').val().trim();
-    if (!tag.startsWith('#')) tag = '#' + tag;
+        $('#clan-info').html(`<p><strong>Type:</strong> ${isCWL ? '🏅 CWL War' : '⚔️ Normal War'}</p>
+      <p><strong>Opponent:</strong> ${warData.opponent?.name || 'Unknown'}</p>`);
 
-    if (!tag) return alert('Please enter a clan tag.');
+        const attackMap = {}; // store strategy data
 
-    $.post('/api/clan', { tag }, () => {
-        loadClanAndWar(); // auto load after save
-    }).fail((err) => {
-        alert('Error loading clan: ' + err.responseJSON?.error || 'Unknown error');
-    });
-});
+        const members = warData.clan.members;
+        const opponents = warData.opponent.members;
 
+        let rows = '';
+        members.forEach((member, idx) => {
+            const playerTag = member.tag;
+            const enemyBase = opponents[idx] || {};
+            const trophy = member.expLevel;
+
+            const baseId = idx + 1;
+            const atk1 = '';
+            const atk2 = isCWL ? 'N/A' : '';
+            const note = '';
+            const stars = '';
+            const percent = '';
+
+            attackMap[playerTag] = {
+                base: baseId,
+                atk1, atk2,
+                note,
+                stars, percent
+            };
+
+            rows += `<tr>
+        <td class="p-2">${member.name} <span class="text-xs text-gray-400">(${trophy}🏆)</span></td>
+        <td class="p-2"><input value="${baseId}" data-tag="${playerTag}" class="base bg-gray-700 px-2 py-1 w-16 rounded"/></td>
+        <td class="p-2"><input type="checkbox" class="atk1" data-tag="${playerTag}"/></td>
+        <td class="p-2">${isCWL ? 'N/A' : `<input type="checkbox" class="atk2" data-tag="${playerTag}"/>`}</td>
+        <td class="p-2"><input class="note bg-gray-700 px-2 py-1 w-full rounded" data-tag="${playerTag}" placeholder="strategy"/></td>
+        <td class="p-2"><input class="star bg-gray-700 w-12 px-1 rounded" data-tag="${playerTag}" /></td>
+        <td class="p-2"><input class="percent bg-gray-700 w-12 px-1 rounded" data-tag="${playerTag}" /></td>
+      </tr>`;
+        });
+
+        $('#war-table').html(rows);
+
+        $('#save-strategy').on('click', () => {
+            const plan = {};
+            $('input.base').each(function () {
+                const tag = $(this).data('tag');
+                plan[tag] = {
+                    base: $(this).val(),
+                    atk1: $(`.atk1[data-tag='${tag}']`).prop('checked'),
+                    atk2: $(`.atk2[data-tag='${tag}']`).prop('checked'),
+                    note: $(`.note[data-tag='${tag}']`).val(),
+                    stars: $(`.star[data-tag='${tag}']`).val(),
+                    percent: $(`.percent[data-tag='${tag}']`).val(),
+                };
+            });
+
+            $.post('/api/strategy', JSON.stringify(plan), null, 'json')
+                .done(() => alert('✅ Strategy saved'))
+                .fail(() => alert('❌ Failed to save strategy'));
+        });
+
+    } catch (err) {
+        console.error(err);
+        alert('❌ Error loading war data');
+    }
+}
 
 $(document).ready(() => {
     loadClanAndWar();
 });
-
-function loadClanAndWar() {
-    $.getJSON('/api/clan', (clan) => {
-        $('#clanInfo').removeClass('hidden');
-        $('#clanBadge').attr('src', clan.badgeUrls.medium);
-        $('#clanName').text(clan.name);
-        $('#clanLevel').text(`Level ${clan.clanLevel}`);
-
-        $.getJSON('/api/currentwar', (war) => {
-            $('#warInfo').removeClass('hidden');
-            const isCWL = war.warType === 'cwl';
-            const warLabel = isCWL ? '📘 CWL Battle Day' : '🔥 Regular Clan War';
-
-            $('#warType').text(warLabel);
-            $('#opponentName').text(`vs ${war.opponent?.name || 'Unknown'}`);
-            $('#opponentBadge').attr('src', war.opponent?.badgeUrls?.medium || '');
-
-            const memberMap = {};
-            (war.clan?.members || []).forEach((m) => {
-                memberMap[m.tag] = {
-                    name: m.name,
-                    warBase: m.mapPosition,
-                };
-            });
-
-            const enemyMembers = war.opponent?.members || [];
-            const enemyOptions = enemyMembers
-                .map((e, idx) => {
-                    const name = e.name || 'Enemy';
-                    const th = e.townhallLevel || '?';
-                    return `<option value="${idx + 1}">#${idx + 1} - ${name} (TH${th})</option>`;
-                })
-                .join('');
-
-            const tableBody = $('#plannerTableBody').empty();
-
-            (clan.memberList || []).forEach((member) => {
-                const warData = memberMap[member.tag] || {};
-                const trophy = member.trophies || 0;
-                const badge = trophyBadge(trophy);
-                const warBase = warData.warBase || '-';
-
-                const row = `
-          <tr>
-            <td class="border px-2 py-1">${member.name}</td>
-            <td class="border px-2 py-1 text-center">
-              <img src="${badge}" class="w-6 h-6 inline-block" />
-              <div class="text-xs">${trophy}</div>
-            </td>
-            <td class="border px-2 py-1 text-center">${warBase}</td>
-            <td class="border px-2 py-1">
-              <select class="w-full border rounded px-1 py-0.5">${enemyOptions}</select>
-            </td>
-            <td class="border px-2 py-1">
-              <input type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="Note 1">
-            </td>
-            ${isCWL
-                        ? '<td class="border px-2 py-1 text-center text-gray-400">—</td>'
-                        : `<td class="border px-2 py-1">
-                     <input type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="Note 2">
-                   </td>`
-                    }
-          </tr>
-        `;
-                tableBody.append(row);
-            });
-
-            $('#plannerWrapper').removeClass('hidden');
-        });
-    });
-}
