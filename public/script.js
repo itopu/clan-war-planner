@@ -28,73 +28,101 @@ $(document).ready(() => {
     loadClanAndWar();
 });
 
-function loadClanAndWar() {
-    $.getJSON('/api/clan', (clan) => {
+async function loadClanAndWar() {
+    try {
+        const clan = await $.getJSON('/api/clan');
         $('#clanInfo').removeClass('hidden');
         $('#clanBadge').attr('src', clan.badgeUrls.medium);
         $('#clanName').text(clan.name);
         $('#clanLevel').text(`Level ${clan.clanLevel}`);
 
-        $.getJSON('/api/currentwar', (war) => {
-            $('#warInfo').removeClass('hidden');
-            const isCWL = war.warType === 'cwl';
-            const warLabel = isCWL ? '📘 CWL Battle Day' : '🔥 Regular Clan War';
+        // Check if CWL war is active
+        let war = null;
+        let isCWL = false;
 
-            $('#warType').text(warLabel);
-            $('#opponentName').text(`vs ${war.opponent?.name || 'Unknown'}`);
-            $('#opponentBadge').attr('src', war.opponent?.badgeUrls?.medium || '');
+        try {
+            const league = await $.getJSON('/api/leaguegroup');
+            const currentRound = league.rounds.find(r => r.warTags.includes('#0') === false); // Exclude empty warTags
+            const activeWarTag = currentRound?.warTags.find(tag => tag && tag !== '#0');
 
-            const memberMap = {};
-            (war.clan?.members || []).forEach((m) => {
-                memberMap[m.tag] = {
-                    name: m.name,
-                    warBase: m.mapPosition,
-                };
-            });
+            if (activeWarTag) {
+                const encoded = encodeURIComponent(activeWarTag);
+                war = await $.getJSON(`/api/cwlwar/${encoded}`);
+                isCWL = true;
+            }
+        } catch (e) {
+            console.warn('No active CWL war found, falling back to regular war.');
+        }
 
-            const enemyMembers = war.opponent?.members || [];
-            const enemyOptions = enemyMembers
-                .map((e, idx) => {
-                    const name = e.name || 'Enemy';
-                    const th = e.townhallLevel || '?';
-                    return `<option value="${idx + 1}">#${idx + 1} - ${name} (TH${th})</option>`;
-                })
-                .join('');
+        // If no CWL war found, fallback to currentwar
+        if (!war) {
+            war = await $.getJSON('/api/currentwar');
+            isCWL = war.warType === 'cwl';
+        }
 
-            const tableBody = $('#plannerTableBody').empty();
+        // --- UI Render ---
+        $('#warInfo').removeClass('hidden');
+        const warLabel = isCWL ? '📘 CWL Battle Day' : '🔥 Regular Clan War';
 
-            (clan.memberList || []).forEach((member) => {
-                const warData = memberMap[member.tag] || {};
-                const trophy = member.trophies || 0;
-                const badge = trophyBadge(trophy);
-                const warBase = warData.warBase || '-';
+        $('#warType').text(warLabel);
+        $('#opponentName').text(`vs ${war.opponent?.name || 'Unknown'}`);
+        $('#opponentBadge').attr('src', war.opponent?.badgeUrls?.medium || '');
 
-                const row = `
-          <tr>
-            <td class="border px-2 py-1">${member.name}</td>
-            <td class="border px-2 py-1 text-center">
-              <img src="${badge}" class="w-6 h-6 inline-block" />
-              <div class="text-xs">${trophy}</div>
-            </td>
-            <td class="border px-2 py-1 text-center">${warBase}</td>
-            <td class="border px-2 py-1">
-              <select class="w-full border rounded px-1 py-0.5">${enemyOptions}</select>
-            </td>
-            <td class="border px-2 py-1">
-              <input type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="Note 1">
-            </td>
-            ${isCWL
-                        ? '<td class="border px-2 py-1 text-center text-gray-400">—</td>'
-                        : `<td class="border px-2 py-1">
-                     <input type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="Note 2">
-                   </td>`
-                    }
-          </tr>
-        `;
-                tableBody.append(row);
-            });
-
-            $('#plannerWrapper').removeClass('hidden');
+        const memberMap = {};
+        (war.clan?.members || []).forEach((m) => {
+            memberMap[m.tag] = {
+                name: m.name,
+                warBase: m.mapPosition,
+            };
         });
-    });
+
+        const enemyMembers = war.opponent?.members || [];
+        const enemyOptions = enemyMembers
+            .map((e, idx) => {
+                const name = e.name || 'Enemy';
+                const th = e.townhallLevel || '?';
+                return `<option value="${idx + 1}">#${idx + 1} - ${name} (TH${th})</option>`;
+            })
+            .join('');
+
+        const tableBody = $('#plannerTableBody').empty();
+
+        (clan.memberList || []).forEach((member) => {
+            const warData = memberMap[member.tag] || {};
+            const trophy = member.trophies || 0;
+            const badge = trophyBadge(trophy);
+            const warBase = warData.warBase || '-';
+
+            const row = `
+                <tr>
+                    <td class="border px-2 py-1">${member.name}</td>
+                    <td class="border px-2 py-1 text-center">
+                        <img src="${badge}" class="w-6 h-6 inline-block" />
+                        <div class="text-xs">${trophy}</div>
+                    </td>
+                    <td class="border px-2 py-1 text-center">${warBase}</td>
+                    <td class="border px-2 py-1">
+                        <select class="w-full border rounded px-1 py-0.5">${enemyOptions}</select>
+                    </td>
+                    <td class="border px-2 py-1">
+                        <input type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="Note 1">
+                    </td>
+                    ${isCWL
+                    ? '<td class="border px-2 py-1 text-center text-gray-400">—</td>'
+                    : `<td class="border px-2 py-1">
+                                <input type="text" class="w-full border rounded px-2 py-1 text-sm" placeholder="Note 2">
+                               </td>`
+                }
+                </tr>
+            `;
+            tableBody.append(row);
+        });
+
+        $('#plannerWrapper').removeClass('hidden');
+
+    } catch (err) {
+        console.error("❌ Error loading data:", err);
+        alert('Failed to load war planner data. See console for details.');
+    }
 }
+

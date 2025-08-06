@@ -34,7 +34,7 @@ const fetchFromClash = async (url) => {
 app.post('/api/clan', async (req, res) => {
     const { tag } = req.body;
     console.log('Received tag:', tag);
-    
+
     if (!tag) return res.status(400).json({ error: 'Clan tag required' });
 
     try {
@@ -51,21 +51,44 @@ app.post('/api/clan', async (req, res) => {
     }
 });
 
-// 🔹 Fetch and save current war
+// 🔹 Fetch and save current war (CWL-aware)
 app.get('/api/currentwar', async (req, res) => {
     try {
         const data = fs.readFileSync(CLAN_FILE, 'utf8');
         const clan = JSON.parse(data);
-
         const encodedTag = encodeURIComponent(clan.tag);
-        const war = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar`);
 
-        fs.writeFileSync(WAR_FILE, JSON.stringify(war, null, 2));
-        res.json(war);
+        const currentWar = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar`);
+
+        // If CWL war is active, currentWar will show warType = 'cwl'
+        if (currentWar.warType === 'cwl') {
+            // Load league group
+            const leagueGroup = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar/leaguegroup`);
+
+            // Find current round (first not ended war)
+            const currentRound = leagueGroup.rounds
+                .flat()
+                .find(round => !round.warEnded);
+
+            if (!currentRound) throw new Error('No active CWL round found.');
+
+            const warTag = encodeURIComponent(currentRound.warTags[0]); // first battle of the round
+            const cwlWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${warTag}`);
+
+            // Save and return
+            fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
+            return res.json(cwlWar);
+        }
+
+        // Not CWL — save and return normal war
+        fs.writeFileSync(WAR_FILE, JSON.stringify(currentWar, null, 2));
+        res.json(currentWar);
     } catch (err) {
+        console.error('❌ Error in /api/currentwar:', err.message);
         res.status(500).json({ error: err.message });
     }
 });
+
 
 // 🔹 Load saved clan from file
 app.get('/api/clan', (req, res) => {
