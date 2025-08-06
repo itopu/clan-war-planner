@@ -11,6 +11,7 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // File paths
@@ -32,6 +33,8 @@ const fetchFromClash = async (url) => {
 // 🔹 Fetch and save clan info
 app.post('/api/clan', async (req, res) => {
     const { tag } = req.body;
+    console.log('Received tag:', tag);
+    
     if (!tag) return res.status(400).json({ error: 'Clan tag required' });
 
     try {
