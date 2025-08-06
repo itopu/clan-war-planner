@@ -123,7 +123,7 @@ $(document).ready(async function () {
             // 🏆 Trophy column with image
             const trophyImage = trophyBadge(member.trophies || 0);
             const trophyHtml = `<span>
-                <img src="${trophyImage}" alt="trophy" class="inline w-${member.trophies > 4900 ? '10' : '8'} mr-1" />
+                <img src="${trophyImage}" alt="trophy" class="inline w-8 mr-1" />
                 ${member.trophies || '-'}
             </span>`;
 
