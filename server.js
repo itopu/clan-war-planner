@@ -58,6 +58,10 @@ app.get('/api/currentwar', async (req, res) => {
         const clan = JSON.parse(data);
         const encodedTag = encodeURIComponent(clan.tag);
 
+        const leagueGroup = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar/leaguegroup`);
+        
+        console.log(leagueGroup);
+        
         const currentWar = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar`);
 
         // If CWL war is active, currentWar will show warType = 'cwl'
@@ -112,4 +116,10 @@ app.get('/api/war', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`🟢 Server is running at http://localhost:${PORT}`);
+});
+
+app.get('/myip', async (req, res) => {
+  const ipResponse = await fetch('https://api64.ipify.org?format=json');
+  const ipData = await ipResponse.json();
+  res.json(ipData);
 });
