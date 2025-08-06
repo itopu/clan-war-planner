@@ -182,7 +182,7 @@ $(document).ready(async function () {
             .filter(e => typeof e.normalizedPosition === 'number')
             .sort((a, b) => a.normalizedPosition - b.normalizedPosition)
             .map(e =>
-                `<option ${enemyBasePos === e.mapPosition ? 'selected' : ''} value="${e.mapPosition}">${e.normalizedPosition}. ${e.name} (TH${e.townhallLevel})</option>`
+                `<option asdf="${enemyBasePos}" value="${e.mapPosition}">${e.normalizedPosition}. ${e.name} (TH${e.townhallLevel})</option>`
             )
             .join('');
     }
