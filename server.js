@@ -59,7 +59,7 @@ app.get('/api/currentwar', async (req, res) => {
                 cwlWar?.opponent?.tag === process.env.CLAN_TAG
             ) {
                 fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
-                return res.json({ type: 'cwl', data: cwlWar, leagueGroup });
+                return res.json({ type: 'cwl', data: cwlWar, warTag: {leagueGroup: leagueGroup, cwlWar: cwlWar} });
             }
         }
     } catch (err) {
