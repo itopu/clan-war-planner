@@ -54,12 +54,28 @@ app.get('/api/currentwar', async (req, res) => {
             const warTag = encodeURIComponent(tag);
             const cwlWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${warTag}`);
 
+            const clanTag = process.env.CLAN_TAG;
+
             if (
-                cwlWar?.clan?.tag === process.env.CLAN_TAG ||
-                cwlWar?.opponent?.tag === process.env.CLAN_TAG
+                (cwlWar?.clan?.tag === clanTag || cwlWar?.opponent?.tag === clanTag) &&
+                cwlWar.state !== 'warEnded'
             ) {
+                // 🔁 Swap if our clan is in opponent slot
+                if (cwlWar.opponent?.tag === clanTag) {
+                    const temp = cwlWar.clan;
+                    cwlWar.clan = cwlWar.opponent;
+                    cwlWar.opponent = temp;
+                }
+
+                // ✅ Save the correctly oriented war data
                 fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
-                return res.json({ type: 'cwl', data: cwlWar, warTag: {leagueGroup: leagueGroup, cwlWar: cwlWar} });
+                return res.json({
+                    type: 'cwl',
+                    data: cwlWar,
+                    
+                    warTag: tag, // Just warTag string
+                    leagueGroup
+                });
             }
         }
     } catch (err) {
