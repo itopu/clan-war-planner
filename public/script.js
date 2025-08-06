@@ -35,7 +35,7 @@ $(document).ready(async function () {
             const isMyClan = warRes.data.clan.tag === myTag;
             const myClan = isMyClan ? warRes.data.clan : warRes.data.opponent;
             const enemyClan = isMyClan ? warRes.data.opponent : warRes.data.clan;
-            
+
             console.log(myTag);
             console.log(isMyClan);
             console.log(myClan);
@@ -54,8 +54,10 @@ $(document).ready(async function () {
             }
 
             // ✅ Build planner
-            const members = myClan.members || [];
-            buildPlannerTable(members, enemyClan, warRes.data, attackPlan);
+            const members = normalizeBaseOrder(myClan.members || []);
+            const enemies = normalizeBaseOrder(enemyClan.members || []);
+
+            buildPlannerTable(members, enemies, warRes.data, attackPlan);
         } catch (err) {
             alert('Failed to auto load data.');
             console.error(err);
@@ -83,7 +85,7 @@ $(document).ready(async function () {
                 <tr class="border">
                     <td class="p-2 border">${member.name}</td>
                     <td class="p-2 border">${member.trophies || '-'}</td>
-                    <td class="p-2 border">${member.mapPosition || '-'}</td>
+                    <td class="p-2 border">${member.normalizedPosition || '-'}</td>
                     <td class="p-2 border">
                         <select class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
                             <option value="">Select</option>
@@ -111,10 +113,12 @@ $(document).ready(async function () {
 
     function generateEnemyOptions(enemyClan) {
         if (!enemyClan?.members) return '';
+
         return enemyClan.members
+            .filter(e => typeof e.mapPosition === 'number')
             .sort((a, b) => a.mapPosition - b.mapPosition)
-            .map((e, i) =>
-                `<option value="${e.mapPosition}">${e.mapPosition}. ${e.name} (TH${e.townhallLevel})</option>`
+            .map((e, index) =>
+                `<option value="${e.mapPosition}">${index + 1}. ${e.name} (TH${e.townhallLevel})</option>`
             )
             .join('');
     }
