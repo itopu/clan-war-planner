@@ -49,8 +49,10 @@ $(document).ready(async function () {
                 attackPlan = [];
             }
 
+            const updatedMyClan = attachTrophiesToMyClan(myClan, clanRes);
+
             // ✅ Build planner
-            const members = normalizeBaseOrder(myClan.members || []);
+            const members = normalizeBaseOrder(updatedMyClan.members || []);
             const enemies = normalizeBaseOrder(enemyClan.members || []);
 
             buildPlannerTable(members, enemies, warRes.data, attackPlan, warRes.type);
@@ -74,6 +76,20 @@ $(document).ready(async function () {
         warInfo.removeClass('hidden');
     }
 
+    function attachTrophiesToMyClan(myClan, clanRes) {
+        const trophyMap = {};
+
+        clanRes.members.items.forEach(member => {
+            trophyMap[member.tag] = member.trophies || 0;
+        });
+        
+        myClan.members.forEach(member => {
+            member.trophies = trophyMap[member.tag] || 0;
+        });
+
+        return myClan;
+    }
+
     function normalizeBaseOrder(members) {
         return members
             .filter(m => typeof m.mapPosition === 'number')
@@ -87,16 +103,25 @@ $(document).ready(async function () {
         members.forEach(member => {
             const existingPlan = plan.find(p => p.tag === member.tag) || {};
 
+            // 🏆 Trophy column with image
+            const trophyImage = trophyBadge(member.trophies || 0);
+            const trophyHtml = `
+                <td class="p-2 border">
+                    <img src="${trophyImage}" alt="trophy" class="inline w-5 mr-1" />
+                    ${member.trophies || '-'}
+                </td>
+            `;
+
             let attackInfo = '—';
             if (member.attacks?.length > 0) {
                 const a = member.attacks[0]; // CWL or first attack
-                attackInfo = `${'⭐'.repeat(a.stars)} (${a.destructionPercentage}%)`;
+                attackInfo = `<span class="block">${'⭐'.repeat(a.stars)} (${a.destructionPercentage}%)</span>`;
             }
 
             const playerRow = `
                 <tr class="border">
                     <td class="p-2 border">${member.name}</td>
-                    <td class="p-2 border">${member.trophies || '-'}</td>
+                    <td class="p-2 border">${trophyHtml}</td>
                     <td class="p-2 border">${member.normalizedPosition || '-'}</td>
                     <td class="p-2 border">${attackInfo || '-'}</td>
                     <td class="p-2 border">
