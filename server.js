@@ -1,44 +1,89 @@
+// server.js
 const express = require('express');
-const fetch = require('node-fetch');
-const dotenv = require('dotenv');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
+require('dotenv').config();
 
-dotenv.config();
 const app = express();
 const PORT = 3000;
 
-// Serve static files from /public
+app.use(cors());
+app.use(express.json());
 app.use(express.static('public'));
 
-// API route to fetch clan info
-app.get('/api/clan/:tag', async (req, res) => {
-  const tag = req.params.tag.replace('#', '%23');
+// File paths
+const CLAN_FILE = path.join(__dirname, 'public', 'my_clan.json');
+const WAR_FILE = path.join(__dirname, 'public', 'current_war.json');
 
-  try {
-    const response = await fetch(`https://api.clashofclans.com/v1/clans/${tag}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.COC_API_TOKEN}`
-      }
+// 🔹 Helper function to fetch from COC API
+const fetchFromClash = async (url) => {
+    const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${process.env.COC_API_TOKEN}`
+        }
     });
 
-    if (!response.ok) {
-      return res.status(response.status).json({ error: 'Clan not found or invalid token.' });
+    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+    return await response.json();
+};
+
+// 🔹 Fetch and save clan info
+app.post('/api/clan', async (req, res) => {
+    const { tag } = req.body;
+    if (!tag) return res.status(400).json({ error: 'Clan tag required' });
+
+    try {
+        const encodedTag = encodeURIComponent(tag);
+        const clan = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}`);
+        const members = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/members`);
+
+        const combined = { ...clan, memberList: members.items };
+        fs.writeFileSync(CLAN_FILE, JSON.stringify(combined, null, 2));
+
+        res.json({ message: 'Clan data saved', clan: combined });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error', detail: error.message });
-  }
 });
 
-// Start server
+// 🔹 Fetch and save current war
+app.get('/api/currentwar', async (req, res) => {
+    try {
+        const data = fs.readFileSync(CLAN_FILE, 'utf8');
+        const clan = JSON.parse(data);
+
+        const encodedTag = encodeURIComponent(clan.tag);
+        const war = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar`);
+
+        fs.writeFileSync(WAR_FILE, JSON.stringify(war, null, 2));
+        res.json(war);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔹 Load saved clan from file
+app.get('/api/clan', (req, res) => {
+    try {
+        const data = fs.readFileSync(CLAN_FILE, 'utf8');
+        res.json(JSON.parse(data));
+    } catch (err) {
+        res.status(500).json({ error: 'Clan file not found' });
+    }
+});
+
+// 🔹 Load saved war from file
+app.get('/api/war', (req, res) => {
+    try {
+        const data = fs.readFileSync(WAR_FILE, 'utf8');
+        res.json(JSON.parse(data));
+    } catch (err) {
+        res.status(500).json({ error: 'War file not found' });
+    }
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
-
-app.get('/myip', async (req, res) => {
-  const ipResponse = await fetch('https://api64.ipify.org?format=json');
-  const ipData = await ipResponse.json();
-  res.json(ipData);
+    console.log(`🟢 Server is running at http://localhost:${PORT}`);
 });
