@@ -1,6 +1,6 @@
 const trophyBadge = (trophies) => {
     if (trophies >= 5000) return "/images/legend_league.webp";                  // Legend
-    if (trophies >= 4400 && trophies <= 4999) return "/images/titan.webp";      // Titan I–III
+    if (trophies >= 4400 && trophies <= 4899) return "/images/titan.webp";      // Titan I–III
     if (trophies >= 3800 && trophies <= 4399) return "/images/champion.webp";   // Champion I–III
     if (trophies >= 3200 && trophies <= 3799) return "/images/master.webp";     // Master I–III
     if (trophies >= 2600 && trophies <= 3199) return "/images/crystal.webp";    // Crystal I–III
@@ -116,24 +116,51 @@ $(document).ready(async function () {
                 attackInfo = `<span class="block">${'⭐'.repeat(a.stars)} (${a.destructionPercentage}%)</span>`;
             }
 
+
+            let attackEnemeySelect = ``;
+            let attackNoteField = ``;
+
+            if (warType === 'cwl') {
+                $('#plannerWrapper table .attack-note-1').text('Attack Note');
+                $('#plannerWrapper table .attack-note-2').hide();
+
+                attackEnemeySelect = `<select name="enemy_select_1" class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
+                        <option value="">Select</option>
+                        ${generateEnemyOptions(enemyClan)}
+                    </select>`;
+                
+                attackNoteField = `<td class="p-2 border text-lg font-semibold">
+                    <input type="text" name="attack_note_1" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
+                </td>`;
+            } else {
+                $('#plannerWrapper table .attack-note-1').text('Attack #1 Note');
+                $('#plannerWrapper table .attack-note-2').show();
+                
+                attackEnemeySelect = `<select name="enemy_select_1" class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
+                        <option value="">Select</option>
+                        ${generateEnemyOptions(enemyClan)}
+                    </select>
+                    <select name="enemy_select_2" class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
+                        <option value="">Select</option>
+                        ${generateEnemyOptions(enemyClan)}
+                    </select>`;
+                
+                attackNoteField = `<td class="p-2 border text-lg font-semibold">
+                    <input type="text" name="attack_note_1" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
+                </td>
+                <td class="p-2 border text-lg font-semibold">
+                    <input type="text" name="attack_note_2" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note2 || ''}" />
+                </td>`;
+            }
+
             const playerRow = `
                 <tr class="border">
                     <td class="p-2 border text-lg font-semibold">${member.name}</td>
                     <td class="p-2 border text-lg font-semibold">${trophyHtml}</td>
-                    <td class="p-2 border">${member.normalizedPosition || '-'}</td>
-                    <td class="p-2 border">${attackInfo || '-'}</td>
-                    <td class="p-2 border">
-                        <select class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
-                            <option value="">Select</option>
-                            ${generateEnemyOptions(enemyClan)}
-                        </select>
-                    </td>
-                    <td class="p-2 border">
-                        <input type="text" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
-                    </td>
-                    <td class="p-2 border">
-                        <input type="text" class="note-2 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note2 || ''}" />
-                    </td>
+                    <td class="p-2 border text-lg font-semibold">${member.normalizedPosition || '-'}</td>
+                    <td class="p-2 border text-lg font-semibold">${attackInfo || '-'}</td>
+                    <td class="p-2 border text-lg font-semibold">${attackEnemeySelect}</td>
+                    ${attackNoteField}
                 </tr>
             `;
             plannerTableBody.append(playerRow);
