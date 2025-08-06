@@ -30,6 +30,26 @@ const fetchFromClash = async (url) => {
     return await response.json();
 };
 
+// 🔹 Fetch for test
+app.get('/api/test', async (req, res) => {
+    const { url } = req.query;
+
+    if (!url) {
+        return res.status(400).json({ error: 'Missing "url" query parameter' });
+    }
+
+    const decodedUrl = decodeURIComponent(url);
+    console.log('Received URL:', decodedUrl);
+
+    try {
+        const apiResponse = await fetchFromClash(decodedUrl);
+        res.json({ message: 'Data fetched successfully', data: apiResponse });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 // 🔹 Fetch and save clan info
 app.post('/api/clan', async (req, res) => {
     const { tag } = req.body;
@@ -59,9 +79,9 @@ app.get('/api/currentwar', async (req, res) => {
         const encodedTag = encodeURIComponent(clan.tag);
 
         const leagueGroup = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar/leaguegroup`);
-        
+
         console.log(leagueGroup);
-        
+
         const currentWar = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar`);
 
         // If CWL war is active, currentWar will show warType = 'cwl'
@@ -119,7 +139,7 @@ app.listen(PORT, () => {
 });
 
 app.get('/myip', async (req, res) => {
-  const ipResponse = await fetch('https://api64.ipify.org?format=json');
-  const ipData = await ipResponse.json();
-  res.json(ipData);
+    const ipResponse = await fetch('https://api64.ipify.org?format=json');
+    const ipData = await ipResponse.json();
+    res.json(ipData);
 });
