@@ -71,7 +71,8 @@ app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
 
-app.get('/ip-check', async (req, res) => {
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  res.send({ ip });
+app.get('/myip', async (req, res) => {
+  const ipResponse = await fetch('https://api64.ipify.org?format=json');
+  const ipData = await ipResponse.json();
+  res.json(ipData);
 });
