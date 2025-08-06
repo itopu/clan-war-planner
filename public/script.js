@@ -122,10 +122,10 @@ $(document).ready(async function () {
         $('.enemy-select, .note-1, .note-2').on('change', saveStrategy);
     }
 
-    function generateEnemyOptions(enemyClan) {
-        if (!enemyClan?.members) return '';
+    function generateEnemyOptions(enemyClanMembers) {
+        if (!enemyClanMembers) return '';
 
-        return enemyClan.members
+        return enemyClanMembers
             .filter(e => typeof e.normalizedPosition === 'number')
             .sort((a, b) => a.normalizedPosition - b.normalizedPosition)
             .map(e =>
