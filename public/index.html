@@ -3,35 +3,56 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clash of Clans War Planner</title>
+    <title>Clash War Planner</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
-<body class="bg-gray-900 text-white min-h-screen p-4">
-    <h1 class="text-3xl font-bold mb-4">🛡️ Clan War Planner</h1>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded shadow">
+        <h1 class="text-3xl font-bold text-center mb-6">⚔️ Clash War Planner</h1>
 
-    <div id="clan-info" class="mb-6"></div>
+        <!-- Clan Tag Form -->
+        <div class="flex items-center justify-center gap-4 mb-8">
+            <input id="clanTagInput" type="text" placeholder="Enter Clan Tag (e.g. #YPQQ9QCC)"
+                class="border px-4 py-2 rounded w-1/2" />
+            <button id="loadClanBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">🔁 Load
+                Clan</button>
+        </div>
 
-    <h2 class="text-xl font-semibold mb-2">⚔️ War Attacks</h2>
-    <table class="table-auto w-full text-sm bg-gray-800 border border-gray-700">
-        <thead>
-            <tr class="bg-gray-700 text-left">
-                <th class="p-2">Player</th>
-                <th class="p-2">Base #</th>
-                <th class="p-2">1st Attack</th>
-                <th class="p-2">2nd Attack</th>
-                <th class="p-2">Notes</th>
-                <th class="p-2">⭐</th>
-                <th class="p-2">%</th>
-            </tr>
-        </thead>
-        <tbody id="war-table"></tbody>
-    </table>
+        <!-- Clan Info -->
+        <div id="clanInfo" class="text-center mb-6 hidden">
+            <img id="clanBadge" class="w-16 h-16 mx-auto" />
+            <h2 id="clanName" class="text-2xl font-semibold mt-2"></h2>
+            <p class="text-sm text-gray-600" id="clanLevel"></p>
+        </div>
 
-    <div class="mt-4">
-        <button id="save-strategy" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded">💾 Save Strategy</button>
+        <!-- War Info -->
+        <div id="warInfo" class="text-center mb-6 hidden">
+            <h2 id="warType" class="text-xl font-semibold"></h2>
+            <p class="text-gray-600" id="opponentName"></p>
+            <img id="opponentBadge" class="w-12 h-12 mx-auto mt-2" />
+        </div>
+
+        <!-- Attack Planner -->
+        <div id="plannerWrapper" class="hidden">
+            <h3 class="text-lg font-bold mb-2">📝 Attack Planner</h3>
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full border border-gray-300 text-sm">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="p-2 border">Player</th>
+                            <th class="p-2 border">🏆</th>
+                            <th class="p-2 border">War Base #</th>
+                            <th class="p-2 border">Enemy Base</th>
+                            <th class="p-2 border">Attack #1 Note</th>
+                            <th class="p-2 border">Attack #2 Note</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plannerTableBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
