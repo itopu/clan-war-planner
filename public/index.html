@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clash War Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 px-4">
+  <div class="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-6">
+    <h1 class="text-2xl font-bold mb-6 text-center">🛡️ Clan War Planner</h1>
+
+    <!-- Clan Tag Input -->
+    <div class="flex gap-4 items-center mb-4">
+      <input type="text" id="clanTag" placeholder="#CLANTAG"
+             class="border rounded px-4 py-2 w-full max-w-sm" />
+      <button id="fetchClanMembers" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Sync Clan</button>
+    </div>
+
+    <!-- War Members List -->
+    <div id="warMemberSelector" class="mb-6 hidden">
+      <h2 class="text-lg font-semibold mb-2">Select War Members</h2>
+      <div id="memberList" class="grid grid-cols-2 md:grid-cols-4 gap-2"></div>
+      <button id="generatePlanner" class="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">Create Planner</button>
+    </div>
+
+    <!-- War Planner Table -->
+    <div id="plannerTableWrapper" class="mt-6 hidden">
+      <h2 class="text-lg font-semibold mb-2">War Attack Planner</h2>
+      <table class="table-auto w-full border border-gray-300">
+        <thead>
+          <tr class="bg-gray-200 text-left">
+            <th class="p-2 border">Player Name</th>
+            <th class="p-2 border">Assigned Base #</th>
+            <th class="p-2 border">1st Attack</th>
+            <th class="p-2 border">2nd Attack</th>
+            <th class="p-2 border">Notes</th>
+          </tr>
+        </thead>
+        <tbody id="plannerTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
