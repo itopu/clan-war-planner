@@ -70,3 +70,8 @@ app.post('/api/strategy', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+app.get('/ip-check', async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  res.send({ ip });
+});
