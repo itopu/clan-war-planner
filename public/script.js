@@ -199,10 +199,10 @@ $(document).ready(async function () {
             const note1 = $(this).find('.note-1').val();
             const note2 = $(this).find('.note-2').val();
 
-            console.log({ tag, enemyBase1, enemyBase2, note1, note2 });
-
             data.push({ tag, enemyBase1, enemyBase2, note1, note2 });
         });
+        
+        console.log(data);
 
         try {
             await $.post('/api/attack-strategy', data);
