@@ -53,7 +53,7 @@ $(document).ready(async function () {
             const members = normalizeBaseOrder(myClan.members || []);
             const enemies = normalizeBaseOrder(enemyClan.members || []);
 
-            // buildPlannerTable(members, enemies, warRes.data, attackPlan, warRes.type);
+            buildPlannerTable(members, enemies, warRes.data, attackPlan, warRes.type);
         } catch (err) {
             alert('Failed to auto load data.');
             console.error(err);
@@ -84,84 +84,39 @@ $(document).ready(async function () {
     }
 
     function buildPlannerTable(members, enemyClan, warData, plan, warType) {
-        const isCWL = warType === 'cwl';
-
         members.forEach(member => {
             const existingPlan = plan.find(p => p.tag === member.tag) || {};
 
-            // 🏆 Trophy column with image
-            const trophyImage = getTrophyImage(member.trophies || 0);
-            const trophyHtml = `
-                <td class="p-2 border">
-                    <img src="${trophyImage}" alt="trophy" class="inline w-5 mr-1" />
-                    ${member.trophies || '-'}
-                </td>
-            `;
-
-            // ⭐ Attack info (first attack only)
             let attackInfo = '—';
             if (member.attacks?.length > 0) {
-                const a = member.attacks[0];
+                const a = member.attacks[0]; // CWL or first attack
                 attackInfo = `${'⭐'.repeat(a.stars)} (${a.destructionPercentage}%)`;
             }
 
-            // 🧱 Build row
-            const row = $('<tr class="border"></tr>');
-            row.append(`<td class="p-2 border">${member.name}</td>`);
-            row.append(trophyHtml);
-            row.append(`<td class="p-2 border">${member.normalizedPosition || '-'}</td>`);
-            row.append(`<td class="p-2 border">${attackInfo}</td>`);
+            const playerRow = `
+                <tr class="border">
+                    <td class="p-2 border">${member.name}</td>
+                    <td class="p-2 border">${member.trophies || '-'}</td>
+                    <td class="p-2 border">${member.normalizedPosition || '-'}</td>
+                    <td class="p-2 border">${attackInfo || '-'}</td>
+                    <td class="p-2 border">
+                        <select class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
+                            <option value="">Select</option>
+                            ${generateEnemyOptions(enemyClan)}
+                        </select>
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="note-2 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note2 || ''}" />
+                    </td>
+                </tr>
+            `;
+            plannerTableBody.append(playerRow);
 
-            if (isCWL) {
-                row.append(`
-                <td class="p-2 border" colspan="2">
-                    <select class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
-                        <option value="">Select</option>
-                        ${generateEnemyOptions(enemyClan)}
-                    </select>
-                </td>
-            `);
-                row.append(`
-                <td class="p-2 border" colspan="2">
-                    <input type="text" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
-                </td>
-            `);
-            } else {
-                row.append(`
-                <td class="p-2 border">
-                    <select class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}" data-slot="1">
-                        <option value="">Select</option>
-                        ${generateEnemyOptions(enemyClan)}
-                    </select>
-                </td>
-            `);
-                row.append(`
-                <td class="p-2 border">
-                    <input type="text" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
-                </td>
-            `);
-                row.append(`
-                <td class="p-2 border">
-                    <select class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}" data-slot="2">
-                        <option value="">Select</option>
-                        ${generateEnemyOptions(enemyClan)}
-                    </select>
-                </td>
-            `);
-                row.append(`
-                <td class="p-2 border">
-                    <input type="text" class="note-2 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note2 || ''}" />
-                </td>
-            `);
-            }
-
-            plannerTableBody.append(row);
-
-            // Prefill enemy selections
             if (existingPlan.enemyBase)
-                $(`.enemy-select[data-tag="${member.tag}"][data-slot="1"]`).val(existingPlan.enemyBase);
-            if (existingPlan.enemyBase2)
-                $(`.enemy-select[data-tag="${member.tag}"][data-slot="2"]`).val(existingPlan.enemyBase2);
+                $(`.enemy-select[data-tag="${member.tag}"]`).val(existingPlan.enemyBase);
         });
 
         plannerWrapper.removeClass('hidden');
