@@ -25,19 +25,28 @@ $(document).ready(function () {
         plannerTableBody.empty();
 
         try {
-            // Load clan info
-            const clanRes = await $.get('/api/clan');
+            // ✅ Load clan info
+            const clanRes = await $.getJSON('/api/clan');
             displayClan(clanRes.clan);
 
-            // Load war info (CWL or regular)
-            const warRes = await $.get('/api/currentwar');
+            // ✅ Load war info (CWL or regular)
+            const warRes = await $.getJSON('/api/currentwar');
             displayWar(warRes.type, warRes.data);
 
-            // Load planner
-            const members = clanRes.members.items;
-            const enemyClan = warRes.data.opponent;
-            const attackPlan = await $.get('/api/attack-strategy');
+            // ✅ Detect which side is our clan
+            const myTag = clanRes.clan.tag;
+            const isMyClan = warRes.data.clan.tag === myTag;
+            const myClan = isMyClan ? warRes.data.clan : warRes.data.opponent;
+            const enemyClan = isMyClan ? warRes.data.opponent : warRes.data.clan;
 
+            // ✅ Load strategy (fallback to [])
+            let attackPlan = [];
+            try {
+                attackPlan = await $.getJSON('/api/attack-strategy');
+            } catch (_) { }
+
+            // ✅ Build planner
+            const members = myClan.members || [];
             buildPlannerTable(members, enemyClan, warRes.data, attackPlan);
         } catch (err) {
             alert('Failed to load data.');
@@ -94,9 +103,12 @@ $(document).ready(function () {
 
     function generateEnemyOptions(enemyClan) {
         if (!enemyClan?.members) return '';
-        return enemyClan.members.map((e, i) =>
-            `<option value="${i + 1}">${i + 1}. ${e.name} (TH${e.townhallLevel})</option>`
-        ).join('');
+        return enemyClan.members
+            .sort((a, b) => a.mapPosition - b.mapPosition)
+            .map((e, i) =>
+                `<option value="${e.mapPosition}">${e.mapPosition}. ${e.name} (TH${e.townhallLevel})</option>`
+            )
+            .join('');
     }
 
     async function saveStrategy() {
