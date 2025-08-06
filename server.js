@@ -72,9 +72,6 @@ app.get('/api/currentwar', async (req, res) => {
                 return res.json({
                     type: 'cwl',
                     data: cwlWar,
-                    
-                    warTag: tag, // Just warTag string
-                    leagueGroup
                 });
             }
         }

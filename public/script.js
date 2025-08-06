@@ -35,12 +35,23 @@ $(document).ready(async function () {
             const isMyClan = warRes.data.clan.tag === myTag;
             const myClan = isMyClan ? warRes.data.clan : warRes.data.opponent;
             const enemyClan = isMyClan ? warRes.data.opponent : warRes.data.clan;
+            
+            console.log(myTag);
+            console.log(isMyClan);
+            console.log(myClan);
+            console.log(enemyClan);
 
             // ✅ Load strategy (fallback to [])
             let attackPlan = [];
             try {
-                attackPlan = await $.getJSON('/api/attack-strategy');
-            } catch (_) { }
+                const data = await $.getJSON('/api/attack-strategy');
+                if (Array.isArray(data)) {
+                    attackPlan = data;
+                }
+            } catch (err) {
+                console.warn('No previous attack plan found. Starting fresh.');
+                attackPlan = [];
+            }
 
             // ✅ Build planner
             const members = myClan.members || [];
