@@ -41,6 +41,9 @@ $(document).ready(async function () {
             let attackPlan = [];
             try {
                 const data = await $.getJSON('/api/attack-strategy');
+                
+                console.log(data);
+
                 if (Array.isArray(data)) {
                     attackPlan = data;
                 }
@@ -191,11 +194,14 @@ $(document).ready(async function () {
 
         $('#plannerTableBody tr').each(function () {
             const tag = $(this).find('select, input').first().data('tag');
-            const enemyBase = $(this).find('.enemy-select').val();
+            const enemyBase1 = $(this).find('select.enemy-select[name="enemy_select_1"]').val();
+            const enemyBase2 = $(this).find('select.enemy-select[name="enemy_select_2"]').val();
             const note1 = $(this).find('.note-1').val();
             const note2 = $(this).find('.note-2').val();
 
-            data.push({ tag, enemyBase, note1, note2 });
+            console.log({ tag, enemyBase1, enemyBase2, note1, note2 });
+
+            data.push({ tag, enemyBase1, enemyBase2, note1, note2 });
         });
 
         try {
