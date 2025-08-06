@@ -137,7 +137,7 @@ $(document).ready(async function () {
             let attackNoteField = ``;
 
             if (warType === 'cwl') {
-                $('#plannerWrapper table .attack-note-1').text('Attack Note');
+                $('#plannerWrapper table .attack-note-1').text('Note');
                 $('#plannerWrapper table .attack-note-2').hide();
 
                 attackEnemeySelect = `<select name="enemy_select_1" class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
