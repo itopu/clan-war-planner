@@ -9,27 +9,24 @@ const trophyBadge = (trophies) => {
     return "https://static.clashofclans.com/img/badges/league-crystal-3.png";
 };
 
-$(document).ready(function () {
+$(document).ready(async function () {
     const clanInfo = $('#clanInfo');
     const warInfo = $('#warInfo');
     const plannerWrapper = $('#plannerWrapper');
     const plannerTableBody = $('#plannerTableBody');
 
-    $('#loadClanBtn').click(async () => {
-        const tag = $('#clanTagInput').val().trim();
-        if (!tag) return alert('Please enter a Clan Tag.');
-
+    async function loadEverything() {
         clanInfo.addClass('hidden');
         warInfo.addClass('hidden');
         plannerWrapper.addClass('hidden');
         plannerTableBody.empty();
 
         try {
-            // ✅ Load clan info
+            // ✅ Load clan info from .env tag (via backend)
             const clanRes = await $.getJSON('/api/clan');
             displayClan(clanRes.clan);
 
-            // ✅ Load war info (CWL or regular)
+            // ✅ Load war info
             const warRes = await $.getJSON('/api/currentwar');
             displayWar(warRes.type, warRes.data);
 
@@ -49,10 +46,10 @@ $(document).ready(function () {
             const members = myClan.members || [];
             buildPlannerTable(members, enemyClan, warRes.data, attackPlan);
         } catch (err) {
-            alert('Failed to load data.');
+            alert('Failed to auto load data.');
             console.error(err);
         }
-    });
+    }
 
     function displayClan(clan) {
         $('#clanBadge').attr('src', clan.badgeUrls.medium);
@@ -74,7 +71,7 @@ $(document).ready(function () {
             const playerRow = `
                 <tr class="border">
                     <td class="p-2 border">${member.name}</td>
-                    <td class="p-2 border">${member.trophies}</td>
+                    <td class="p-2 border">${member.trophies || '-'}</td>
                     <td class="p-2 border">${member.mapPosition || '-'}</td>
                     <td class="p-2 border">
                         <select class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
@@ -129,4 +126,7 @@ $(document).ready(function () {
             console.error('Failed to save strategy', err);
         }
     }
+
+    // 🔁 Auto-load everything on page ready
+    loadEverything();
 });

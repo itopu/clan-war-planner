@@ -51,7 +51,7 @@ app.get('/api/currentwar', async (req, res) => {
             const warTag = encodeURIComponent(ongoingWarTag);
             const cwlWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${warTag}`);
             fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
-            return res.json({ type: 'cwl', data: cwlWar });
+            return res.json({ type: 'cwl', data: cwlWar, leagueGroup: leagueGroup });
         }
     } catch (err) {
         // fallback to regular war if not CWL
