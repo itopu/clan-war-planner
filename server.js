@@ -1,4 +1,4 @@
-// server.js
+// ✅ server.js (updated with routes as per your instruction)
 const express = require('express');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const fs = require('fs');
@@ -14,201 +14,78 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// File paths
-const CLAN_FILE = path.join(__dirname, 'public', 'my_clan.json');
-const WAR_FILE = path.join(__dirname, 'public', 'current_war.json');
+const CLAN_FILE = path.join(__dirname, 'data', 'my_clan.json');
+const WAR_FILE = path.join(__dirname, 'data', 'current_war.json');
+const ATTACK_STRATEGY = path.join(__dirname, 'data', 'attack_strategy.json');
 
-// 🔹 Helper function to fetch from COC API
 const fetchFromClash = async (url) => {
     const response = await fetch(url, {
         headers: {
             Authorization: `Bearer ${process.env.COC_API_TOKEN}`
         }
     });
-
     if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
     return await response.json();
 };
 
-// 🔹 Fetch for test
-app.get('/api/test', async (req, res) => {
-    const { url } = req.query;
-
-    if (!url) {
-        return res.status(400).json({ error: 'Missing "url" query parameter' });
-    }
-
-    const decodedUrl = decodeURIComponent(url);
-    console.log('Received URL:', decodedUrl);
-
-    if (!decodedUrl.startsWith('https://api.clashofclans.com/v1/')) {
-        return res.status(403).json({ error: 'Only Clash of Clans API endpoints are allowed.' });
-    }
-
+app.get('/api/clan', async (req, res) => {
+    const encodedTag = encodeURIComponent(process.env.CLAN_TAG);
     try {
-        const apiResponse = await fetchFromClash(decodedUrl);
-        res.json({ message: 'Data fetched successfully', data: apiResponse });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-
-// 🔹 Fetch and save clan info
-app.post('/api/clan', async (req, res) => {
-    const { tag } = req.body;
-    console.log('Received tag:', tag);
-
-    if (!tag) return res.status(400).json({ error: 'Clan tag required' });
-
-    try {
-        const encodedTag = encodeURIComponent(tag);
         const clan = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}`);
         const members = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/members`);
-
-        const combined = { ...clan, memberList: members.items };
-        fs.writeFileSync(CLAN_FILE, JSON.stringify(combined, null, 2));
-
-        res.json({ message: 'Clan data saved', clan: combined });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        fs.writeFileSync(CLAN_FILE, JSON.stringify({ clan, members }, null, 2));
+        res.json({ clan, members });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
-// 🔹 Fetch and save current war (CWL-aware)
 app.get('/api/currentwar', async (req, res) => {
+    const encodedTag = encodeURIComponent(process.env.CLAN_TAG);
     try {
-        const data = fs.readFileSync(CLAN_FILE, 'utf8');
-        const clan = JSON.parse(data);
-        const encodedTag = encodeURIComponent(clan.tag);
-
         const leagueGroup = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar/leaguegroup`);
 
-        console.log(leagueGroup);
+        const ongoingWarTag = leagueGroup.rounds.flatMap(r => r.warTags).find(tag => tag && tag !== '#0');
 
-        const currentWar = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar`);
-
-        // If CWL war is active, currentWar will show warType = 'cwl'
-        if (currentWar.warType === 'cwl') {
-            // Load league group
-            const leagueGroup = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar/leaguegroup`);
-
-            // Find current round (first not ended war)
-            const currentRound = leagueGroup.rounds
-                .flat()
-                .find(round => !round.warEnded);
-
-            if (!currentRound) throw new Error('No active CWL round found.');
-
-            const warTag = encodeURIComponent(currentRound.warTags[0]); // first battle of the round
+        if (ongoingWarTag) {
+            const warTag = encodeURIComponent(ongoingWarTag);
             const cwlWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${warTag}`);
-
-            // Save and return
             fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
-            return res.json(cwlWar);
+            return res.json({ type: 'cwl', data: cwlWar });
         }
-
-        // Not CWL — save and return normal war
-        fs.writeFileSync(WAR_FILE, JSON.stringify(currentWar, null, 2));
-        res.json(currentWar);
     } catch (err) {
-        console.error('❌ Error in /api/currentwar:', err.message);
-        res.status(500).json({ error: err.message });
+        // fallback to regular war if not CWL
+    }
+
+    try {
+        const regularWar = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar`);
+        fs.writeFileSync(WAR_FILE, JSON.stringify(regularWar, null, 2));
+        res.json({ type: 'regular', data: regularWar });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
-app.get('/api/leaguegroup', async (req, res) => {
+app.post('/api/attack-strategy', (req, res) => {
     try {
-        const data = fs.readFileSync(CLAN_FILE, 'utf8');
-        const clan = JSON.parse(data);
-        const encodedTag = encodeURIComponent(clan.tag);
-
-        const currentWar = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar/leaguegroup`);
-
-        // If CWL war is active, currentWar will show warType = 'cwl'
-        if (currentWar.state === 'inWar') {
-            // Find current round (first not ended war)
-            const currentRound = currentWar.rounds
-                .flat()
-                .find(round => !round.warEnded);
-
-            if (!currentRound) throw new Error('No active CWL round found.');
-
-            const warTag = encodeURIComponent(currentRound.warTags[0]); // first battle of the round
-            const cwlWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${warTag}`);
-
-            // Save and return
-            fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
-            return res.json(cwlWar);
-        }
-
-        // Not CWL — save and return normal war
-        fs.writeFileSync(WAR_FILE, JSON.stringify(currentWar, null, 2));
-        res.json(currentWar);
+        fs.writeFileSync(ATTACK_STRATEGY, JSON.stringify(req.body, null, 2));
+        res.json({ message: 'Saved successfully' });
     } catch (err) {
-        console.error('❌ Error in /api/leaguegroup:', err.message);
-        res.status(500).json({ error: err.message });
+        res.status(500).json({ error: 'Failed to save' });
     }
 });
 
-app.get('/api/cwlwar', async (req, res) => {
+app.get('/api/attack-strategy', (req, res) => {
     try {
-        const data = fs.readFileSync(CLAN_FILE, 'utf8');
-        const clan = JSON.parse(data);
-        const encodedTag = encodeURIComponent(clan.tag);
-
-        const currentWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${encodedTag}`);
-
-        // If CWL war is active, currentWar will show warType = 'cwl'
-        if (currentWar.warType === 'cwl') {
-            // Find current round (first not ended war)
-            const currentRound = currentWar.rounds
-                .flat()
-                .find(round => !round.warEnded);
-
-            if (!currentRound) throw new Error('No active CWL round found.');
-
-            const warTag = encodeURIComponent(currentRound.warTags[0]); // first battle of the round
-            const cwlWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${warTag}`);
-
-            // Save and return
-            fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
-            return res.json(cwlWar);
-        }
-
-        // Not CWL — save and return normal war
-        fs.writeFileSync(WAR_FILE, JSON.stringify(currentWar, null, 2));
-        res.json(currentWar);
-    } catch (err) {
-        console.error('❌ Error in /api/leaguegroup:', err.message);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-
-// 🔹 Load saved clan from file
-app.get('/api/clan', (req, res) => {
-    try {
-        const data = fs.readFileSync(CLAN_FILE, 'utf8');
+        const data = fs.existsSync(ATTACK_STRATEGY) ? fs.readFileSync(ATTACK_STRATEGY) : '[]';
         res.json(JSON.parse(data));
     } catch (err) {
-        res.status(500).json({ error: 'Clan file not found' });
+        res.status(500).json({ error: 'Failed to load strategy' });
     }
 });
 
-// 🔹 Load saved war from file
-app.get('/api/war', (req, res) => {
-    try {
-        const data = fs.readFileSync(WAR_FILE, 'utf8');
-        res.json(JSON.parse(data));
-    } catch (err) {
-        res.status(500).json({ error: 'War file not found' });
-    }
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-app.listen(PORT, () => {
-    console.log(`🟢 Server is running at http://localhost:${PORT}`);
-});
 
 app.get('/myip', async (req, res) => {
     const ipResponse = await fetch('https://api64.ipify.org?format=json');
