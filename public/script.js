@@ -67,15 +67,26 @@ $(document).ready(async function () {
         $('#clanBadge').attr('src', clan.badgeUrls.medium);
         $('#clanName').text(clan.name);
         $('#clanLevel').text(`Level ${clan.clanLevel}`);
+        
         clanInfo.removeClass('hidden');
+        
         $('#warVersas').removeClass('hidden');
     }
-
+    
     function displayWar(type, warData) {
         $('#warType').text(type === 'cwl' ? 'Clan War League' : 'Regular War');
+        
         $('#opponentName').text(warData.opponent.name || 'Unknown');
         $('#opponentBadge').attr('src', warData.opponent.badgeUrls.medium);
+        $('#enemyClanLevel').text(`Level ${warData.opponent.clanLevel}`);
+
         warInfo.removeClass('hidden');
+
+        $('#ourStars').text(`${warData.clan.destructionPercentage || 0}% ⭐ ${warData.clan.stars}/${warData.teamSize * 3}`);
+        $('#enemyStars').text(`${warData.opponent.destructionPercentage || 0}% ⭐ ${warData.opponent.stars}/${warData.teamSize * 3}`);
+        
+        $('#ourAttacks').text(`${warData.clan.attacks || 0} ⚔️ ${warData.teamSize}`);
+        $('#enemyAttacks').text(`${warData.clan.opponent || 0} ⚔️ ${warData.teamSize}`);
     }
 
     function attachTrophiesToMyClan(myClan, clanRes) {
@@ -117,7 +128,6 @@ $(document).ready(async function () {
                 const a = member.attacks[0]; // CWL or first attack
                 attackInfo = `<span class="block">${'⭐'.repeat(a.stars)} (${a.destructionPercentage}%)</span>`;
             }
-
 
             let attackEnemeySelect = ``;
             let attackNoteField = ``;
@@ -201,8 +211,6 @@ $(document).ready(async function () {
 
             data.push({ tag, enemyBase1, enemyBase2, note1, note2 });
         });
-
-        console.log(data);
 
         try {
             await $.ajax({
