@@ -57,6 +57,8 @@ $(document).ready(async function () {
             const members = normalizeBaseOrder(myClan.members || []);
             const enemies = normalizeBaseOrder(enemyClan.members || []);
 
+            console.log(enemies);
+            
             buildPlannerTable(members, enemies, warRes.data, attackPlan);
         } catch (err) {
             alert('Failed to auto load data.');
@@ -122,12 +124,10 @@ $(document).ready(async function () {
 
     function generateEnemyOptions(enemyClan) {
         if (!enemyClan?.members) return '';
-
         return enemyClan.members
-            .filter(e => typeof e.mapPosition === 'number')
             .sort((a, b) => a.mapPosition - b.mapPosition)
-            .map((e, index) =>
-                `<option value="${e.mapPosition}">${index + 1}. ${e.name} (TH${e.townhallLevel})</option>`
+            .map((e, i) =>
+                <option value="${e.mapPosition}">${e.mapPosition}. ${e.name} (TH${e.townhallLevel})</option>
             )
             .join('');
     }
