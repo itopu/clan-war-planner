@@ -16,7 +16,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-const HEADERS = { Authorization: `Bearer ${API_TOKEN}` };
+const HEADERS = {
+    Authorization: `Bearer ${API_TOKEN}`,
+    Accept: 'application/json'
+};
 
 // Utility to save JSON files
 const saveFile = (filename, data) => {
