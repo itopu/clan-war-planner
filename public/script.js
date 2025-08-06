@@ -78,6 +78,15 @@ $(document).ready(async function () {
         warInfo.removeClass('hidden');
     }
 
+    function normalizeBaseOrder(members) {
+        return members
+            .filter(m => typeof m.mapPosition === 'number')
+            .sort((a, b) => a.mapPosition - b.mapPosition) // sort by actual base number
+            .map((m, i) => {
+                return { ...m, normalizedPosition: i + 1 }; // assign 1-based serial
+            });
+    }
+
     function buildPlannerTable(members, enemyClan, warData, plan) {
         members.forEach(member => {
             const existingPlan = plan.find(p => p.tag === member.tag) || {};
