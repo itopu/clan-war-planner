@@ -36,3 +36,9 @@ app.get('/api/clan/:tag', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+
+app.get('/myip', async (req, res) => {
+  const ipResponse = await fetch('https://api64.ipify.org?format=json');
+  const ipData = await ipResponse.json();
+  res.json(ipData);
+});
