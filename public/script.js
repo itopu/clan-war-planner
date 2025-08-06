@@ -67,6 +67,7 @@ $(document).ready(async function () {
         $('#clanName').text(clan.name);
         $('#clanLevel').text(`Level ${clan.clanLevel}`);
         clanInfo.removeClass('hidden');
+        $('#warVersas').removeClass('hidden');
     }
 
     function displayWar(type, warData) {
@@ -205,5 +206,5 @@ $(document).ready(async function () {
     }
 
     // 🔁 Auto-load everything on page ready
-    // loadEverything();
+    loadEverything();
 });
