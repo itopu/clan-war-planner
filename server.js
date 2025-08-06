@@ -126,6 +126,40 @@ app.get('/api/leaguegroup', async (req, res) => {
         const currentWar = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar/leaguegroup`);
 
         // If CWL war is active, currentWar will show warType = 'cwl'
+        if (currentWar.state === 'inWar') {
+            // Find current round (first not ended war)
+            const currentRound = currentWar.rounds
+                .flat()
+                .find(round => !round.warEnded);
+
+            if (!currentRound) throw new Error('No active CWL round found.');
+
+            const warTag = encodeURIComponent(currentRound.warTags[0]); // first battle of the round
+            const cwlWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${warTag}`);
+
+            // Save and return
+            fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
+            return res.json(cwlWar);
+        }
+
+        // Not CWL — save and return normal war
+        fs.writeFileSync(WAR_FILE, JSON.stringify(currentWar, null, 2));
+        res.json(currentWar);
+    } catch (err) {
+        console.error('❌ Error in /api/leaguegroup:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/cwlwar', async (req, res) => {
+    try {
+        const data = fs.readFileSync(CLAN_FILE, 'utf8');
+        const clan = JSON.parse(data);
+        const encodedTag = encodeURIComponent(clan.tag);
+
+        const currentWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${encodedTag}`);
+
+        // If CWL war is active, currentWar will show warType = 'cwl'
         if (currentWar.warType === 'cwl') {
             // Find current round (first not ended war)
             const currentRound = currentWar.rounds
