@@ -41,6 +41,10 @@ app.get('/api/test', async (req, res) => {
     const decodedUrl = decodeURIComponent(url);
     console.log('Received URL:', decodedUrl);
 
+    if (!decodedUrl.startsWith('https://api.clashofclans.com/v1/')) {
+        return res.status(403).json({ error: 'Only Clash of Clans API endpoints are allowed.' });
+    }
+
     try {
         const apiResponse = await fetchFromClash(decodedUrl);
         res.json({ message: 'Data fetched successfully', data: apiResponse });

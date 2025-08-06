@@ -9,6 +9,25 @@ const trophyBadge = (trophies) => {
     return "https://static.clashofclans.com/img/badges/league-crystal-3.png";
 };
 
+// Load api
+$('#loadAPIBtn').on('click', () => {
+    let apiUrl = $('#apiUrlInput').val().trim();
+
+    if (!apiUrl) return alert('Please enter a URL.');
+
+    // Encode the URL to be safe for query parameter
+    let encodedUrl = encodeURIComponent(apiUrl);
+
+    $.get(`/api/test?url=${encodedUrl}`, (response) => {
+        console.log('API Response:', response);
+    }).fail((err) => {
+        console.error('API Error:', err.responseJSON || err);
+        alert('Failed to fetch data.');
+    });
+});
+
+
+
 // Load and save clan tag
 $('#loadClanBtn').on('click', () => {
     let tag = $('#clanTagInput').val().trim();
