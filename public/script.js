@@ -42,8 +42,6 @@ $(document).ready(async function () {
             try {
                 const data = await $.getJSON('/api/attack-strategy');
 
-                console.log(data);
-
                 if (Array.isArray(data)) {
                     attackPlan = data;
                 }
@@ -130,7 +128,7 @@ $(document).ready(async function () {
 
                 attackEnemeySelect = `<select name="enemy_select_1" class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
                         <option value="">Select</option>
-                        ${generateEnemyOptions(enemyClan)}
+                        ${generateEnemyOptions(enemyClan, existingPlan.enemyBase1 ?? '')}
                     </select>`;
 
                 attackNoteField = `<td class="p-2 border text-lg font-semibold">
@@ -142,11 +140,11 @@ $(document).ready(async function () {
 
                 attackEnemeySelect = `<select name="enemy_select_1" class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
                         <option value="">Select</option>
-                        ${generateEnemyOptions(enemyClan)}
+                        ${generateEnemyOptions(enemyClan, existingPlan.enemyBase1 ?? '')}
                     </select>
                     <select name="enemy_select_2" class="enemy-select w-full border rounded px-1 py-1" data-tag="${member.tag}">
                         <option value="">Select</option>
-                        ${generateEnemyOptions(enemyClan)}
+                        ${generateEnemyOptions(enemyClan, existingPlan.enemyBase2 ?? '')}
                     </select>`;
 
                 attackNoteField = `<td class="p-2 border text-lg font-semibold">
@@ -177,14 +175,14 @@ $(document).ready(async function () {
         $('.enemy-select, .note-1, .note-2').on('change', saveStrategy);
     }
 
-    function generateEnemyOptions(enemyClanMembers) {
+    function generateEnemyOptions(enemyClanMembers, enemyBasePos) {
         if (!enemyClanMembers) return '';
 
         return enemyClanMembers
             .filter(e => typeof e.normalizedPosition === 'number')
             .sort((a, b) => a.normalizedPosition - b.normalizedPosition)
             .map(e =>
-                `<option value="${e.mapPosition}">${e.normalizedPosition}. ${e.name} (TH${e.townhallLevel})</option>`
+                `<option ${enemyBasePos === e.mapPosition ? 'selected' : ''} value="${e.mapPosition}">${e.normalizedPosition}. ${e.name} (TH${e.townhallLevel})</option>`
             )
             .join('');
     }
