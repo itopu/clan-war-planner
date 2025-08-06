@@ -124,10 +124,12 @@ $(document).ready(async function () {
 
     function generateEnemyOptions(enemyClan) {
         if (!enemyClan?.members) return '';
+
         return enemyClan.members
-            .sort((a, b) => a.mapPosition - b.mapPosition)
-            .map((e, i) =>
-                `<option value="${e.mapPosition}">${e.mapPosition}. ${e.name} (TH${e.townhallLevel})</option>`
+            .filter(e => typeof e.normalizedPosition === 'number')
+            .sort((a, b) => a.normalizedPosition - b.normalizedPosition)
+            .map(e =>
+                `<option value="${e.mapPosition}">${e.normalizedPosition}. ${e.name} (TH${e.townhallLevel})</option>`
             )
             .join('');
     }
