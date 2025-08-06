@@ -42,21 +42,31 @@ app.get('/api/clan', async (req, res) => {
 
 app.get('/api/currentwar', async (req, res) => {
     const encodedTag = encodeURIComponent(process.env.CLAN_TAG);
+
     try {
         const leagueGroup = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar/leaguegroup`);
 
-        const ongoingWarTag = leagueGroup.rounds.flatMap(r => r.warTags).find(tag => tag && tag !== '#0');
+        const allWarTags = leagueGroup.rounds
+            .flatMap(round => round.warTags)
+            .filter(tag => tag && tag !== '#0');
 
-        if (ongoingWarTag) {
-            const warTag = encodeURIComponent(ongoingWarTag);
+        for (const tag of allWarTags) {
+            const warTag = encodeURIComponent(tag);
             const cwlWar = await fetchFromClash(`https://api.clashofclans.com/v1/clanwarleagues/wars/${warTag}`);
-            fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
-            return res.json({ type: 'cwl', data: cwlWar, leagueGroup: leagueGroup });
+
+            if (
+                cwlWar?.clan?.tag === process.env.CLAN_TAG ||
+                cwlWar?.opponent?.tag === process.env.CLAN_TAG
+            ) {
+                fs.writeFileSync(WAR_FILE, JSON.stringify(cwlWar, null, 2));
+                return res.json({ type: 'cwl', data: cwlWar, leagueGroup });
+            }
         }
     } catch (err) {
-        // fallback to regular war if not CWL
+        console.log('CWL fetch failed or not found. Falling back to regular war...');
     }
 
+    // fallback to regular war if not CWL
     try {
         const regularWar = await fetchFromClash(`https://api.clashofclans.com/v1/clans/${encodedTag}/currentwar`);
         fs.writeFileSync(WAR_FILE, JSON.stringify(regularWar, null, 2));
