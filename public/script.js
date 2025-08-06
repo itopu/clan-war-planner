@@ -53,7 +53,7 @@ $(document).ready(async function () {
             const members = normalizeBaseOrder(myClan.members || []);
             const enemies = normalizeBaseOrder(enemyClan.members || []);
 
-            buildPlannerTable(members, enemies, warRes.data, attackPlan, warRes.type);
+            // buildPlannerTable(members, enemies, warRes.data, attackPlan, warRes.type);
         } catch (err) {
             alert('Failed to auto load data.');
             console.error(err);
