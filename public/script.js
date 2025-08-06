@@ -1,5 +1,5 @@
 const trophyBadge = (trophies) => {
-    if (trophies >= 5000) return "/images/legend_league.webp";                  // Legend
+    if (trophies >= 5000 && trophies <= 4900) return "/images/legend_league.webp";                  // Legend
     if (trophies >= 4400 && trophies <= 4899) return "/images/titan.webp";      // Titan I–III
     if (trophies >= 3800 && trophies <= 4399) return "/images/champion.webp";   // Champion I–III
     if (trophies >= 3200 && trophies <= 3799) return "/images/master.webp";     // Master I–III
@@ -155,7 +155,7 @@ $(document).ready(async function () {
 
             const playerRow = `
                 <tr class="border border-2">
-                    <td class="p-2 border text-lg font-semibold">#${member.normalizedPosition ?? '-'} ${member.name}</td>
+                    <td class="p-2 border text-lg font-semibold"><span class="text-slate-400">#${member.normalizedPosition ?? '-'}</span> ${member.name}</td>
                     <td class="p-2 border text-lg font-semibold">${trophyHtml}</td>
                     <td class="p-2 border text-lg font-semibold">${attackInfo || '-'}</td>
                     <td class="p-2 border text-lg font-semibold">${attackEnemeySelect}</td>
