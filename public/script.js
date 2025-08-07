@@ -145,7 +145,7 @@ $(document).ready(async function () {
             const townHallHtml = `<span class="inline items-center gap-1">
                 <img src="${townHallImage}" alt="trophy" class="w-8 inline" />
             </span>`;
-            
+
             const mirrorOponent = enemyClan[key];
             let mirrorOponentHtml = '--';
 
@@ -155,10 +155,9 @@ $(document).ready(async function () {
                     <img src="${mirrorOponentTownHallImage}" alt="trophy" class="w-8 inline" />
                 </span>`;
 
-                mirrorOponentHtml = `#${mirrorOponent.normalizedPosition ?? '-'}</span> ${mirrorOponentTownHallHtml} ${mirrorOponent.name}`;
+                mirrorOponentHtml = `<span class="text-slate-400">#${mirrorOponent.normalizedPosition ?? '-'}</span> ${mirrorOponentTownHallHtml} ${mirrorOponent.name}`;
             }
 
-            console.log(key);
             console.log(mirrorOponent);
 
             // 🏆 Trophy column with image
@@ -169,19 +168,22 @@ $(document).ready(async function () {
             </span>`;
 
             let attackInfo = '—';
-
             if (member.attacks?.length > 0) {
                 attackInfo = '';
 
                 member.attacks.forEach((a, i) => {
                     const defenderData = enemyClan.find(p => p.tag === a.defenderTag) || {};
-
-                    // console.log(defenderData);
-
-                    const stars = '⭐'.repeat(a.stars);
                     const percent = a.destructionPercentage.toFixed(2);
 
-                    attackInfo += `<span class="block">#${defenderData.normalizedPosition}: ${stars} (${percent}%)</span>`;
+                    let starsHtml = '';
+                    for (let s = 1; s <= 3; s++) {
+                        const color = s <= a.stars ? '' : 'text-[#ddd]';
+                        starsHtml += `<span class="${color}">⭐</span>`;
+                    }
+
+                    attackInfo += `<span class="block text-sm">
+                        #${defenderData.normalizedPosition}: ${starsHtml} (${percent}%)
+                    </span>`;
                 });
             }
 
