@@ -140,11 +140,17 @@ $(document).ready(async function () {
         members.forEach(member => {
             const existingPlan = plan.find(p => p.tag === member.tag) || {};
 
+            // 🏆 Town hall image
+            const townHallImage = townHalls(member.townhallLevel || 1);
+            const townHallHtml = `<span class="inline-flex items-center gap-1">
+                <img src="${townHallImage}" alt="trophy" class="w-10 inline" />
+            </span>`;
+            
             // 🏆 Trophy column with image
             const trophyImage = trophyBadge(member.trophies || 0);
-            const trophyHtml = `<span>
-                <img src="${trophyImage}" alt="trophy" class="inline w-8 mr-1" />
-                ${member.trophies || '-'}
+            const trophyHtml = `<span class="inline-flex items-center gap-1">
+                <img src="${trophyImage}" alt="trophy" class="w-8 inline" />
+                <span class="bg-neutral-700/60 text-white text-[12px] px-[3px] py-[1px] rounded-full">${member.trophies || '-'}</span>
             </span>`;
 
             let attackInfo = '—';
@@ -160,7 +166,7 @@ $(document).ready(async function () {
                     const stars = '⭐'.repeat(a.stars);
                     const percent = a.destructionPercentage.toFixed(2);
 
-                    attackInfo += `<span class="block">#: ${stars} (${percent}%)</span>`;
+                    attackInfo += `<span class="block">#${defenderData.normalizedPosition}: ${stars} (${percent}%)</span>`;
                 });
             }
 
@@ -202,7 +208,7 @@ $(document).ready(async function () {
 
             const playerRow = `
                 <tr class="border border-2">
-                    <td class="p-2 border text-lg font-semibold"><span class="text-slate-400">#${member.normalizedPosition ?? '-'}</span> ${member.name}</td>
+                    <td class="p-2 border text-lg font-semibold"><span class="text-slate-400">${townHallHtml} #${member.normalizedPosition ?? '-'}</span> ${trophyHtml} ${member.name}</td>
                     <td class="p-2 border text-lg font-semibold">${trophyHtml}</td>
                     <td class="p-2 border text-lg font-semibold">${attackInfo || '-'}</td>
                     <td class="p-2 border text-lg font-semibold">${attackEnemeySelect}</td>
