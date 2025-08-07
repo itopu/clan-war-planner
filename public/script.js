@@ -112,36 +112,32 @@ $(document).ready(async function () {
         $('#ourAttacks').text(`${warData.clan.attacks || 0} ⚔️ ${warData.teamSize}`);
         $('#enemyAttacks').text(`${warData.opponent.attacks || 0} ⚔️ ${warData.teamSize}`);
 
-        const countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
+        const warTimerEl = document.getElementById("warTimer");
 
-        console.log(warData);
-        console.log({preparationStartTime: warData.preparationStartTime});
-        console.log({warStartTime: warData.warStartTime});
-        console.log({endTime: warData.endTime});
+        // Initial render
+        let countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
 
         if (countdown) {
-            document.getElementById("warTimer").innerHTML = `
-            <div class="text-center font-semibold text-lg leading-tight">
-                ${countdown.time}<br>
-                <span class="text-sm text-gray-500">${countdown.label}</span>
-            </div>`;
+            warTimerEl.innerHTML = `
+        <div class="text-center font-semibold text-lg leading-tight">
+            ${countdown.time}<br>
+            <span class="text-sm text-gray-500">${countdown.label}</span>
+        </div>`;
         } else {
-            document.getElementById("warTimer").innerText = "War Ended";
+            warTimerEl.innerText = "War Ended";
         }
 
+        // Auto update every 60s
         setInterval(() => {
-            const countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
+            countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
 
-            if (countdown) {
-                document.getElementById("warTimer").innerHTML = `
-                <div class="text-center font-semibold text-lg leading-tight">
-                    ${countdown.time}<br>
-                    <span class="text-sm text-gray-500">${countdown.label}</span>
-                </div>`;
-            } else {
-                document.getElementById("warTimer").innerText = "War Ended";
-            }
-        }, 60000); // every 60 seconds
+            warTimerEl.innerHTML = countdown
+                ? `<div class="text-center font-semibold text-lg leading-tight">
+                ${countdown.time}<br>
+                <span class="text-sm text-gray-500">${countdown.label}</span>
+           </div>`
+                : "War Ended";
+        }, 60000);
     }
 
     function attachTrophiesToMyClan(myClan, clanRes) {
@@ -158,17 +154,26 @@ $(document).ready(async function () {
         return myClan;
     }
 
-    function getWarCountdown(preparationStart, warStart, warEnd) {
-        const nowUTC = new Date(new Date().toISOString()); // always in UTC
-        const prepTime = new Date(preparationStart);
-        const warTime = new Date(warStart);
-        const endTime = new Date(warEnd);
+    function fixClashTimeFormat(str) {
+        return str.replace(
+            /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
+            "$1-$2-$3T$4:$5:$6"
+        );
+    }
 
-        // Debug logs
-        // console.log("⏱️ nowUTC:", nowUTC.toISOString());
-        // console.log("🛡️ prepTime:", prepTime.toISOString());
-        // console.log("⚔️ warTime:", warTime.toISOString());
-        // console.log("🏁 endTime:", endTime.toISOString());
+    function getWarCountdown(preparationStart, warStart, warEnd) {
+        // Step 1: Fix the time format
+        const prepTime = Date.parse(fixClashTimeFormat(preparationStart));
+        const warTime = Date.parse(fixClashTimeFormat(warStart));
+        const endTime = Date.parse(fixClashTimeFormat(warEnd));
+
+        const nowUTC = Date.now(); // current UTC time in ms
+
+        // Optional debug logs
+        console.log("⏱️ nowUTC:", new Date(nowUTC).toISOString());
+        console.log("🛡️ prepTime:", new Date(prepTime).toISOString());
+        console.log("⚔️ warTime:", new Date(warTime).toISOString());
+        console.log("🏁 endTime:", new Date(endTime).toISOString());
 
         let remaining;
         let label;
@@ -180,7 +185,7 @@ $(document).ready(async function () {
             remaining = endTime - nowUTC;
             label = "Battle Day";
         } else {
-            return null; // War ended
+            return null; // War Ended
         }
 
         const totalMinutes = Math.floor(remaining / 60000);
@@ -189,7 +194,7 @@ $(document).ready(async function () {
 
         return {
             time: `${hours}h ${minutes}m`,
-            label: label
+            label
         };
     }
 
