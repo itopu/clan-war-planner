@@ -162,6 +162,12 @@ $(document).ready(async function () {
         const warTime = new Date(warStart);
         const endTime = new Date(warEnd);
 
+        // Debug logs
+        console.log("⏱️ nowUTC:", nowUTC.toISOString());
+        console.log("🛡️ prepTime:", prepTime.toISOString());
+        console.log("⚔️ warTime:", warTime.toISOString());
+        console.log("🏁 endTime:", endTime.toISOString());
+
         let remaining;
         let label;
 
