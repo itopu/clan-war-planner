@@ -265,7 +265,7 @@ $(document).ready(async function () {
                     </select>`;
 
                 attackNoteField = `<td class="p-2 border text-lg font-semibold">
-                    <input type="text" name="attack_note_1" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
+                    <input type="text" name="attack_note_1" class="note-1 w-full border border-slate-400 rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
                 </td>`;
             } else {
                 $('#plannerWrapper table .attack-note-1').text('Attack #1 Note');
@@ -281,10 +281,10 @@ $(document).ready(async function () {
                     </select>`;
 
                 attackNoteField = `<td class="p-2 border text-lg font-semibold">
-                    <input type="text" name="attack_note_1" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
+                    <input type="text" name="attack_note_1" class="note-1 w-full border border-slate-400 rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note1 || ''}" />
                 </td>
                 <td class="p-2 border text-lg font-semibold">
-                    <input type="text" name="attack_note_2" class="note-1 w-full border rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note2 || ''}" />
+                    <input type="text" name="attack_note_2" class="note-1 w-full border border-slate-400 rounded px-1 py-1" data-tag="${member.tag}" value="${existingPlan.note2 || ''}" />
                 </td>`;
             }
 
