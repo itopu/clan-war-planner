@@ -1,3 +1,23 @@
+const townHalls = (th) => {
+    if (th = 17) return "/images/th/17.webp";
+    if (th = 16) return "/images/th/16.webp";
+    if (th = 15) return "/images/th/15.webp";
+    if (th = 14) return "/images/th/14.webp";
+    if (th = 13) return "/images/th/13.webp";
+    if (th = 12) return "/images/th/12.webp";
+    if (th = 11) return "/images/th/11.webp";
+    if (th = 10) return "/images/th/10.webp";
+    if (th = 9) return "/images/th/9.webp";
+    if (th = 8) return "/images/th/8.webp";
+    if (th = 7) return "/images/th/7.webp";
+    if (th = 6) return "/images/th/6.webp";
+    if (th = 5) return "/images/th/5.webp";
+    if (th = 4) return "/images/th/4.webp";
+    if (th = 3) return "/images/th/3.webp";
+    if (th = 2) return "/images/th/2.webp";
+    return "/images/th/1.webp";
+};
+
 const trophyBadge = (trophies) => {
     if (trophies >= 4900) return "/images/legend_league.webp";                  // Legend
     if (trophies >= 4400 && trophies <= 4899) return "/images/titan.webp";      // Titan I–III
@@ -84,7 +104,7 @@ $(document).ready(async function () {
 
         const ourDestruction = (warData.clan.destructionPercentage || 0).toFixed(2);
         $('#ourStars').text(`${ourDestruction || 0}% ⭐ ${warData.clan.stars}/${warData.teamSize * 3}`);
-        
+
         const opponentDestruction = (warData.opponent.destructionPercentage || 0).toFixed(2);
         $('#enemyStars').text(`${opponentDestruction}% ⭐ ${warData.opponent.stars}/${warData.teamSize * 3}`);
 
@@ -128,9 +148,20 @@ $(document).ready(async function () {
             </span>`;
 
             let attackInfo = '—';
+
             if (member.attacks?.length > 0) {
-                const a = member.attacks[0]; // CWL or first attack
-                attackInfo = `<span class="block">${'⭐'.repeat(a.stars)} (${a.destructionPercentage}%)</span>`;
+                attackInfo = '';
+
+                member.attacks.forEach((a, i) => {
+                    const defenderData = enemyClan.find(p => p.tag === a.tag) || {};
+
+                    console.log(defenderData);
+
+                    const stars = '⭐'.repeat(a.stars);
+                    const percent = a.destructionPercentage.toFixed(2);
+
+                    attackInfo += `<span class="block">#: ${stars} (${percent}%)</span>`;
+                });
             }
 
             let attackEnemeySelect = ``;
