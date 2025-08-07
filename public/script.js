@@ -149,13 +149,15 @@ $(document).ready(async function () {
 
             let attackInfo = '—';
 
+            console.log(enemyClan);
+
             if (member.attacks?.length > 0) {
                 attackInfo = '';
 
                 member.attacks.forEach((a, i) => {
                     const defenderData = enemyClan.find(p => p.tag === a.tag) || {};
 
-                    console.log(defenderData);
+                    console.log(a);
 
                     const stars = '⭐'.repeat(a.stars);
                     const percent = a.destructionPercentage.toFixed(2);
