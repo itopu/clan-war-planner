@@ -115,7 +115,9 @@ $(document).ready(async function () {
         const countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
 
         console.log(warData);
-        console.log(countdown);
+        console.log({preparationStartTime: warData.preparationStartTime});
+        console.log({warStartTime: warData.warStartTime});
+        console.log({endTime: warData.endTime});
 
         if (countdown) {
             document.getElementById("warTimer").innerHTML = `
@@ -163,10 +165,10 @@ $(document).ready(async function () {
         const endTime = new Date(warEnd);
 
         // Debug logs
-        console.log("⏱️ nowUTC:", nowUTC.toISOString());
-        console.log("🛡️ prepTime:", prepTime.toISOString());
-        console.log("⚔️ warTime:", warTime.toISOString());
-        console.log("🏁 endTime:", endTime.toISOString());
+        // console.log("⏱️ nowUTC:", nowUTC.toISOString());
+        // console.log("🛡️ prepTime:", prepTime.toISOString());
+        // console.log("⚔️ warTime:", warTime.toISOString());
+        // console.log("🏁 endTime:", endTime.toISOString());
 
         let remaining;
         let label;
