@@ -146,6 +146,9 @@ $(document).ready(async function () {
                 <img src="${townHallImage}" alt="trophy" class="w-10 inline" />
             </span>`;
             
+            console.log(townHallImage);
+            console.log(townHallHtml);
+
             // 🏆 Trophy column with image
             const trophyImage = trophyBadge(member.trophies || 0);
             const trophyHtml = `<span class="inline items-center gap-1">
