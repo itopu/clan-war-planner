@@ -142,6 +142,10 @@ $(document).ready(async function () {
 
             // 🏆 Town hall image
             const townHallImage = townHalls(member.townhallLevel || 1);
+
+            console.log(member);
+            console.log(townHallImage);
+
             const townHallHtml = `<span class="inline-flex items-center gap-1">
                 <img src="${townHallImage}" alt="trophy" class="w-10 inline" />
             </span>`;
