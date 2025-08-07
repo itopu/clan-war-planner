@@ -216,11 +216,13 @@ $(document).ready(async function () {
 
             if (mirrorOponent) {
                 const mirrorOponentTownHallImage = townHalls(mirrorOponent.townhallLevel ?? 1);
-                const mirrorOponentTownHallHtml = `<span class="inline items-center gap-1">
-                    <img src="${mirrorOponentTownHallImage}" alt="trophy" class="w-8 inline" />
-                </span>`;
 
-                mirrorOponentHtml = `<span class="text-slate-400">#${mirrorOponent.normalizedPosition ?? '-'}</span> ${mirrorOponentTownHallHtml} ${mirrorOponent.name}`;
+                mirrorOponentHtml = `<span class="inline-flex items-center gap-1 ml-1">
+                    <span class="text-slate-400">#${mirrorOponent.normalizedPosition}</span>
+                    <img src="${mirrorOponentTownHallImage}" alt="trophy" class="w-8" />
+
+                    <span class="w-[100px] truncate text-slate-800">${mirrorOponent.name}</span>
+                </span>`;
             }
 
             // 🏆 Trophy column with image
