@@ -147,6 +147,17 @@ $(document).ready(async function () {
             </span>`;
             
             const mirrorOponent = enemyClan[key];
+            let mirrorOponentHtml = '--';
+
+            if (mirrorOponent) {
+                const mirrorOponentTownHallImage = townHalls(mirrorOponent.townhallLevel ?? 1);
+                const mirrorOponentTownHallHtml = `<span class="inline items-center gap-1">
+                    <img src="${mirrorOponentTownHallImage}" alt="trophy" class="w-8 inline" />
+                </span>`;
+
+                mirrorOponentHtml = `#${mirrorOponent.normalizedPosition ?? '-'}</span> ${mirrorOponentTownHallHtml} ${mirrorOponent.name}`;
+            }
+
             console.log(key);
             console.log(mirrorOponent);
 
@@ -214,7 +225,7 @@ $(document).ready(async function () {
                 <tr class="border border-2">
                     <td class="p-2 border text-lg font-semibold"><span class="text-slate-400">${townHallHtml} #${member.normalizedPosition ?? '-'}</span> ${trophyHtml} ${member.name}</td>
                     <td class="p-2 border text-lg font-semibold">${attackInfo || '-'}</td>
-                    <td class="p-2 border text-lg font-semibold"></td>
+                    <td class="p-2 border text-lg font-semibold">${mirrorOponentHtml}</td>
                     <td class="p-2 border text-lg font-semibold">${attackEnemeySelect}</td>
                     ${attackNoteField}
                 </tr>
