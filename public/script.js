@@ -141,8 +141,8 @@ $(document).ready(async function () {
             const existingPlan = plan.find(p => p.tag === member.tag) || {};
 
             // 🏆 Town hall image
-            var townHallImage = townHalls(member.townhallLevel || 1);
-            var townHallHtml = `<span class="inline items-center gap-1">
+            const townHallImage = townHalls(member.townhallLevel ?? 1);
+            const townHallHtml = `<span class="inline items-center gap-1">
                 <img src="${townHallImage}" alt="trophy" class="w-8 inline" />
             </span>`;
             
@@ -151,7 +151,7 @@ $(document).ready(async function () {
             console.log(townHallHtml);
 
             // 🏆 Trophy column with image
-            const trophyImage = trophyBadge(member.trophies || 0);
+            const trophyImage = trophyBadge(member.trophies ?? 0);
             const trophyHtml = `<span class="inline items-center gap-1">
                 <img src="${trophyImage}" alt="trophy" class="w-8 inline" />
                 <span class="bg-neutral-700/60 text-white text-[12px] px-[3px] py-[1px] rounded-full">${member.trophies || '-'}</span>
