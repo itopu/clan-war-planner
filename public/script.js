@@ -114,6 +114,7 @@ $(document).ready(async function () {
 
         const countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
 
+        console.log(warData);
         console.log(countdown);
 
         if (countdown) {
