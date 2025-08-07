@@ -125,6 +125,20 @@ $(document).ready(async function () {
         } else {
             document.getElementById("warTimer").innerText = "War Ended";
         }
+
+        setInterval(() => {
+            const countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
+
+            if (countdown) {
+                document.getElementById("warTimer").innerHTML = `
+                <div class="text-center font-semibold text-lg leading-tight">
+                    ${countdown.time}<br>
+                    <span class="text-sm text-gray-500">${countdown.label}</span>
+                </div>`;
+            } else {
+                document.getElementById("warTimer").innerText = "War Ended";
+            }
+        }, 60000); // every 60 seconds
     }
 
     function attachTrophiesToMyClan(myClan, clanRes) {
