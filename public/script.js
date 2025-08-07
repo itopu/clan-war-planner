@@ -1,20 +1,20 @@
 const townHalls = (th) => {
-    if (th = 17) return "/images/town_hall/17.webp";
-    if (th = 16) return "/images/town_hall/16.webp";
-    if (th = 15) return "/images/town_hall/15.webp";
-    if (th = 14) return "/images/town_hall/14.webp";
-    if (th = 13) return "/images/town_hall/13.webp";
-    if (th = 12) return "/images/town_hall/12.webp";
-    if (th = 11) return "/images/town_hall/11.webp";
-    if (th = 10) return "/images/town_hall/10.webp";
-    if (th = 9) return "/images/town_hall/9.webp";
-    if (th = 8) return "/images/town_hall/8.webp";
-    if (th = 7) return "/images/town_hall/7.webp";
-    if (th = 6) return "/images/town_hall/6.webp";
-    if (th = 5) return "/images/town_hall/5.webp";
-    if (th = 4) return "/images/town_hall/4.webp";
-    if (th = 3) return "/images/town_hall/3.webp";
-    if (th = 2) return "/images/town_hall/2.webp";
+    if (th == 17) return "/images/town_hall/17.webp";
+    if (th == 16) return "/images/town_hall/16.webp";
+    if (th == 15) return "/images/town_hall/15.webp";
+    if (th == 14) return "/images/town_hall/14.webp";
+    if (th == 13) return "/images/town_hall/13.webp";
+    if (th == 12) return "/images/town_hall/12.webp";
+    if (th == 11) return "/images/town_hall/11.webp";
+    if (th == 10) return "/images/town_hall/10.webp";
+    if (th == 9) return "/images/town_hall/9.webp";
+    if (th == 8) return "/images/town_hall/8.webp";
+    if (th == 7) return "/images/town_hall/7.webp";
+    if (th == 6) return "/images/town_hall/6.webp";
+    if (th == 5) return "/images/town_hall/5.webp";
+    if (th == 4) return "/images/town_hall/4.webp";
+    if (th == 3) return "/images/town_hall/3.webp";
+    if (th == 2) return "/images/town_hall/2.webp";
     return "/images/town_hall/1.webp";
 };
 
@@ -148,7 +148,6 @@ $(document).ready(async function () {
             
             console.log(member);
             console.log(townHallImage);
-            console.log(townHallHtml);
 
             // 🏆 Trophy column with image
             const trophyImage = trophyBadge(member.trophies ?? 0);
@@ -165,7 +164,7 @@ $(document).ready(async function () {
                 member.attacks.forEach((a, i) => {
                     const defenderData = enemyClan.find(p => p.tag === a.defenderTag) || {};
 
-                    console.log(defenderData);
+                    // console.log(defenderData);
 
                     const stars = '⭐'.repeat(a.stars);
                     const percent = a.destructionPercentage.toFixed(2);
