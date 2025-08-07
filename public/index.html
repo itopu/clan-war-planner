@@ -13,25 +13,30 @@
         <h1 class="sm:text-3xl xl:text-3xl font-bold text-center mb-6">⚔️ Clash War Planner</h1>
 
         <h2 id="warType" class="text-center sm:text-4xl xl:text-2xl font-bold mb-4"></h2>
+        <div id="warTimer" class="text-center mt-2 sm:text-3xl xl:text-xl mb-3 font-bold text-blue-700">
+            <!-- Time will be inserted here -->
+        </div>
 
         <div class="flex items-center justify-center gap-10 sm:mt-8 mb-6">
 
             <!-- Clan Info -->
             <div id="clanInfo" class="text-center hidden">
-                <img id="clanBadge" class="sm:w-36 sm:h-36 xl:w-16 xl:h-16 mx-auto" src="https://api-assets.clashofclans.com/badges/200/I8we-LqZafK7py1EUYSDZTiq-OEyeD05mEobDJJ6ytI.png">
+                <img id="clanBadge" class="sm:w-36 sm:h-36 xl:w-16 xl:h-16 mx-auto"
+                    src="https://api-assets.clashofclans.com/badges/200/I8we-LqZafK7py1EUYSDZTiq-OEyeD05mEobDJJ6ytI.png">
                 <h2 id="clanName" class="sm:text-3xl xl:text-xl font-semibold mt-2">ThE DeViLs</h2>
                 <p class="text-lg text-gray-600" id="clanLevel">Level 13</p>
 
                 <p class="sm:text-3xl xl:text-xl text-gray-600 mt-4" id="ourStars">0.00% ⭐ 0/90</p>
                 <p class="sm:text-3xl xl:text-xl text-gray-600 mt-4" id="ourAttacks">0 ⚔️ 30</p>
             </div>
-            
+
             <!-- VS Text -->
             <div class="text-2xl font-bold text-gray-700 hidden" id="warVersas">VS</div>
-            
+
             <!-- Opponent Info -->
             <div id="warInfo" class="text-center hidden">
-                <img id="opponentBadge" class="sm:w-36 sm:h-36 xl:w-16 xl:h-16 mx-auto mb-2" src="https://api-assets.clashofclans.com/badges/200/rmF1n2w4lxV8sqULGrSCsAh3zs4SEqk1YZNw56LGbj8.png">
+                <img id="opponentBadge" class="sm:w-36 sm:h-36 xl:w-16 xl:h-16 mx-auto mb-2"
+                    src="https://api-assets.clashofclans.com/badges/200/rmF1n2w4lxV8sqULGrSCsAh3zs4SEqk1YZNw56LGbj8.png">
                 <h2 class="text-gray-600 sm:text-3xl xl:text-xl font-semibold" id="opponentName">⚜️Boro✖️Boys⚜️</h2>
                 <p class="text-lg text-gray-600" id="enemyClanLevel">Level 9</p>
 
@@ -51,8 +56,10 @@
                             <th class="p-2 border text-lg font-semibold">War Attack</th>
                             <th class="p-2 border text-lg font-semibold">Opponent</th>
                             <th class="p-2 border text-lg font-semibold">Attack Suggestion</th>
-                            <th class="p-2 border text-lg font-semibold attack-note-1" style="white-space: nowrap; width: 15%;">#1 Note</th>
-                            <th class="p-2 border text-lg font-semibold attack-note-2" style="white-space: nowrap; width: 15%;">#2 Note</th>
+                            <th class="p-2 border text-lg font-semibold attack-note-1"
+                                style="white-space: nowrap; width: 15%;">#1 Note</th>
+                            <th class="p-2 border text-lg font-semibold attack-note-2"
+                                style="white-space: nowrap; width: 15%;">#2 Note</th>
                         </tr>
                     </thead>
                     <tbody id="plannerTableBody"></tbody>

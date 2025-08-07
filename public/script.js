@@ -111,6 +111,18 @@ $(document).ready(async function () {
 
         $('#ourAttacks').text(`${warData.clan.attacks || 0} ⚔️ ${warData.teamSize}`);
         $('#enemyAttacks').text(`${warData.opponent.attacks || 0} ⚔️ ${warData.teamSize}`);
+
+        const countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
+
+        if (countdown) {
+            document.getElementById("warTimer").innerHTML = `
+            <div class="text-center font-semibold text-lg leading-tight">
+                ${countdown.time}<br>
+                <span class="text-sm text-gray-500">${countdown.label}</span>
+            </div>`;
+        } else {
+            document.getElementById("warTimer").innerText = "War Ended";
+        }
     }
 
     function attachTrophiesToMyClan(myClan, clanRes) {
@@ -125,6 +137,38 @@ $(document).ready(async function () {
         });
 
         return myClan;
+    }
+
+    function getWarCountdown(preparationStart, warStart, warEnd) {
+        const now = new Date();
+        const prepTime = new Date(preparationStart);
+        const warTime = new Date(warStart);
+        const endTime = new Date(warEnd);
+
+        let remaining;
+        let label;
+
+        if (now < warTime) {
+            // Preparation Day
+            remaining = warTime - now;
+            label = "Preparation Day";
+        } else if (now >= warTime && now < endTime) {
+            // War Day
+            remaining = endTime - now;
+            label = "Battle Day";
+        } else {
+            return null; // War ended
+        }
+
+        // Convert remaining milliseconds to hours & minutes
+        const totalMinutes = Math.floor(remaining / 60000);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        return {
+            time: `${hours}h ${minutes}m`,
+            label: label
+        };
     }
 
     function normalizeBaseOrder(members) {
@@ -177,8 +221,8 @@ $(document).ready(async function () {
 
                     let starsHtml = '';
                     for (let s = 1; s <= 3; s++) {
-                        const color = s <= a.stars ? '' : 'text-[#ddd]';
-                        starsHtml += `<span class="${color}">⭐</span>`;
+                        const opacity = s <= a.stars ? '' : 'opacity-[0.3]';
+                        starsHtml += `<span class="${opacity}">⭐</span>`;
                     }
 
                     attackInfo += `<span class="block text-sm">
