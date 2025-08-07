@@ -114,6 +114,8 @@ $(document).ready(async function () {
 
         const countdown = getWarCountdown(warData.preparationStartTime, warData.warStartTime, warData.endTime);
 
+        console.log(countdown);
+
         if (countdown) {
             document.getElementById("warTimer").innerHTML = `
             <div class="text-center font-semibold text-lg leading-tight">
@@ -141,26 +143,25 @@ $(document).ready(async function () {
 
     function getWarCountdown(preparationStart, warStart, warEnd) {
         const now = new Date();
+        const nowUTC = new Date(now.toISOString()); // force to UTC
+
         const prepTime = new Date(preparationStart);
         const warTime = new Date(warStart);
-        const endTime = new Date(warEnd);
+        const endTime = new Date(endTime);
 
         let remaining;
         let label;
 
-        if (now < warTime) {
-            // Preparation Day
-            remaining = warTime - now;
+        if (nowUTC < warTime) {
+            remaining = warTime - nowUTC;
             label = "Preparation Day";
-        } else if (now >= warTime && now < endTime) {
-            // War Day
-            remaining = endTime - now;
+        } else if (nowUTC >= warTime && nowUTC < endTime) {
+            remaining = endTime - nowUTC;
             label = "Battle Day";
         } else {
-            return null; // War ended
+            return null; // War Ended
         }
 
-        // Convert remaining milliseconds to hours & minutes
         const totalMinutes = Math.floor(remaining / 60000);
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes % 60;
@@ -201,8 +202,6 @@ $(document).ready(async function () {
 
                 mirrorOponentHtml = `<span class="text-slate-400">#${mirrorOponent.normalizedPosition ?? '-'}</span> ${mirrorOponentTownHallHtml} ${mirrorOponent.name}`;
             }
-
-            console.log(mirrorOponent);
 
             // 🏆 Trophy column with image
             const trophyImage = trophyBadge(member.trophies ?? 0);
