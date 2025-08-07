@@ -1,21 +1,21 @@
 const townHalls = (th) => {
-    if (th = 17) return "/images/th/17.webp";
-    if (th = 16) return "/images/th/16.webp";
-    if (th = 15) return "/images/th/15.webp";
-    if (th = 14) return "/images/th/14.webp";
-    if (th = 13) return "/images/th/13.webp";
-    if (th = 12) return "/images/th/12.webp";
-    if (th = 11) return "/images/th/11.webp";
-    if (th = 10) return "/images/th/10.webp";
-    if (th = 9) return "/images/th/9.webp";
-    if (th = 8) return "/images/th/8.webp";
-    if (th = 7) return "/images/th/7.webp";
-    if (th = 6) return "/images/th/6.webp";
-    if (th = 5) return "/images/th/5.webp";
-    if (th = 4) return "/images/th/4.webp";
-    if (th = 3) return "/images/th/3.webp";
-    if (th = 2) return "/images/th/2.webp";
-    return "/images/th/1.webp";
+    if (th = 17) return "/images/town_hall/17.webp";
+    if (th = 16) return "/images/town_hall/16.webp";
+    if (th = 15) return "/images/town_hall/15.webp";
+    if (th = 14) return "/images/town_hall/14.webp";
+    if (th = 13) return "/images/town_hall/13.webp";
+    if (th = 12) return "/images/town_hall/12.webp";
+    if (th = 11) return "/images/town_hall/11.webp";
+    if (th = 10) return "/images/town_hall/10.webp";
+    if (th = 9) return "/images/town_hall/9.webp";
+    if (th = 8) return "/images/town_hall/8.webp";
+    if (th = 7) return "/images/town_hall/7.webp";
+    if (th = 6) return "/images/town_hall/6.webp";
+    if (th = 5) return "/images/town_hall/5.webp";
+    if (th = 4) return "/images/town_hall/4.webp";
+    if (th = 3) return "/images/town_hall/3.webp";
+    if (th = 2) return "/images/town_hall/2.webp";
+    return "/images/town_hall/1.webp";
 };
 
 const trophyBadge = (trophies) => {
@@ -142,17 +142,13 @@ $(document).ready(async function () {
 
             // 🏆 Town hall image
             const townHallImage = townHalls(member.townhallLevel || 1);
-
-            console.log(member);
-            console.log(townHallImage);
-
-            const townHallHtml = `<span class="inline-flex items-center gap-1">
+            const townHallHtml = `<span class="inline items-center gap-1">
                 <img src="${townHallImage}" alt="trophy" class="w-10 inline" />
             </span>`;
             
             // 🏆 Trophy column with image
             const trophyImage = trophyBadge(member.trophies || 0);
-            const trophyHtml = `<span class="inline-flex items-center gap-1">
+            const trophyHtml = `<span class="inline items-center gap-1">
                 <img src="${trophyImage}" alt="trophy" class="w-8 inline" />
                 <span class="bg-neutral-700/60 text-white text-[12px] px-[3px] py-[1px] rounded-full">${member.trophies || '-'}</span>
             </span>`;
@@ -212,7 +208,7 @@ $(document).ready(async function () {
 
             const playerRow = `
                 <tr class="border border-2">
-                    <td class="p-2 border text-lg font-semibold"><span class="text-slate-400">#${member.normalizedPosition ?? '-'}</span> ${trophyHtml} ${member.name}</td>
+                    <td class="p-2 border text-lg font-semibold"><span class="text-slate-400">${townHallHtml} #${member.normalizedPosition ?? '-'}</span> ${trophyHtml} ${member.name}</td>
                     <td class="p-2 border text-lg font-semibold">${trophyHtml}</td>
                     <td class="p-2 border text-lg font-semibold">${attackInfo || '-'}</td>
                     <td class="p-2 border text-lg font-semibold">${attackEnemeySelect}</td>
