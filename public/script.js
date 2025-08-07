@@ -142,26 +142,28 @@ $(document).ready(async function () {
     }
 
     function getWarCountdown(preparationStart, warStart, warEnd) {
-        const now = new Date();
-        const nowUTC = new Date(now.toISOString()); // force to UTC
-
+        const nowLocal = new Date();
+        const now = new Date(nowLocal.toISOString());
         const prepTime = new Date(preparationStart);
         const warTime = new Date(warStart);
-        const endTime = new Date(endTime);
+        const endTime = new Date(warEnd);
 
         let remaining;
         let label;
 
-        if (nowUTC < warTime) {
-            remaining = warTime - nowUTC;
+        if (now < warTime) {
+            // Preparation Day
+            remaining = warTime - now;
             label = "Preparation Day";
-        } else if (nowUTC >= warTime && nowUTC < endTime) {
-            remaining = endTime - nowUTC;
+        } else if (now >= warTime && now < endTime) {
+            // War Day
+            remaining = endTime - now;
             label = "Battle Day";
         } else {
-            return null; // War Ended
+            return null; // War ended
         }
 
+        // Convert remaining milliseconds to hours & minutes
         const totalMinutes = Math.floor(remaining / 60000);
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes % 60;
