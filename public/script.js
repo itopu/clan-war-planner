@@ -141,11 +141,12 @@ $(document).ready(async function () {
             const existingPlan = plan.find(p => p.tag === member.tag) || {};
 
             // 🏆 Town hall image
-            const townHallImage = townHalls(member.townhallLevel || 1);
-            const townHallHtml = `<span class="inline items-center gap-1">
-                <img src="${townHallImage}" alt="trophy" class="w-10 inline" />
+            var townHallImage = townHalls(member.townhallLevel || 1);
+            var townHallHtml = `<span class="inline items-center gap-1">
+                <img src="${townHallImage}" alt="trophy" class="w-8 inline" />
             </span>`;
             
+            console.log(member);
             console.log(townHallImage);
             console.log(townHallHtml);
 
