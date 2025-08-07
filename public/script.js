@@ -169,12 +169,6 @@ $(document).ready(async function () {
 
         const nowUTC = Date.now(); // current UTC time in ms
 
-        // Optional debug logs
-        console.log("⏱️ nowUTC:", new Date(nowUTC).toISOString());
-        console.log("🛡️ prepTime:", new Date(prepTime).toISOString());
-        console.log("⚔️ warTime:", new Date(warTime).toISOString());
-        console.log("🏁 endTime:", new Date(endTime).toISOString());
-
         let remaining;
         let label;
 
