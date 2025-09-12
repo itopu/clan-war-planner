@@ -89,26 +89,30 @@ app.get('/api/currentwar', async (req, res) => {
     }
 });
 
-app.post('/api/attack-strategy', (req, res) => {
-    try {
-        fs.writeFileSync(ATTACK_STRATEGY, JSON.stringify(req.body, null, 2));
-        res.json({ message: 'Saved successfully' });
-    } catch (err) {
-        res.status(500).json({ error: 'Failed to save' });
-    }
-});
-
+// ✅ Read attack strategy
 app.get('/api/attack-strategy', (req, res) => {
     try {
-        const data = fs.existsSync(ATTACK_STRATEGY) ? fs.readFileSync(ATTACK_STRATEGY) : '[]';
-        res.json(JSON.parse(data));
+        if (!fs.existsSync(ATTACK_STRATEGY)) {
+            // file na thakle empty object return korbo
+            return res.json({});
+        }
+
+        const raw = fs.readFileSync(ATTACK_STRATEGY, 'utf8');
+        const data = raw ? JSON.parse(raw) : {};
+        res.json(data);
     } catch (err) {
+        console.error("Error reading strategy:", err);
         res.status(500).json({ error: 'Failed to load strategy' });
     }
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// ✅ Save/update attack strategy
+app.post('/api/attack-strategy', (req, res) => {
+    fs.writeFileSync(ATTACK_STRATEGY, JSON.stringify(req.body, null, 2));
+    res.json({ success: true });
+});
 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 app.get('/myip', async (req, res) => {
     const ipResponse = await fetch('https://api64.ipify.org?format=json');

@@ -2,72 +2,283 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Clash War Planner</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>War Screen • Tailwind</title>
+
+  <!-- favicon -->
+  <link rel='icon' href='images/titan.webp' type='image/x-icon'>
+  <!-- favicon -->
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Rubik:wght@400;600&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #16252b;
+      --panel: #1e2f36;
+      --accent: #ffcc00;
+      --accent-2: #8b5cf6;
+      --good: #22c55e;
+      --bad: #ef4444;
+    }
+
+    body {
+      font-family: 'Rubik', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    .title {
+      font-family: 'Rajdhani', sans-serif
+    }
+
+    .iso {
+      aspect-ratio: 1 / 1;
+      clip-path: polygon(25% 0, 75% 0, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0 75%, 0 25%);
+      background: linear-gradient(180deg, #263b44, #16252b);
+      box-shadow: inset 0 2px 0 #344b54, inset 0 -2px 0 #0e171b;
+    }
+
+    .star svg {
+      filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .35));
+    }
+
+    /* opponent বক্সে hover হলে */
+    .droppable-hover {
+      outline: 2px dashed rgba(255, 255, 255, .5);
+      border-radius: .5rem;
+    }
+
+    /* flag যেটা drop হলে বসবে */
+    .war-flag {
+      position: absolute;
+      right: -8px;
+      top: -8px;
+      width: 38px;
+      height: 46px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* ড্র্যাগ চলাকালীন source item সামান্য fade হবে */
+    /* default image drag ghost বন্ধ করা */
+    .war-participator-item img {
+      -webkit-user-drag: none;
+    }
+
+    .dragging {
+      opacity: 0.4;
+    }
+
+    .war-participator-item img {
+      -webkit-user-drag: none;
+    }
+
+    /* ভিজ্যুয়াল কার্সর */
+    #my-clan-member-list-container .war-participator-item .item {
+      cursor: grab;
+    }
+
+    .dragging {
+      cursor: grabbing !important;
+      opacity: .4;
+    }
+
+    /* native image ghost বন্ধ */
+    .war-participator-item img {
+      -webkit-user-drag: none;
+    }
+
+    /* optional: droppable hover outline */
+    .droppable-hover {
+      outline: 2px dashed rgba(255, 255, 255, .5);
+      border-radius: .5rem;
+    }
+
+    .war-flag {
+      position: absolute;
+      right: -8px;
+      top: -8px;
+      width: 38px;
+      height: 46px;
+      pointer-events: none;
+      z-index: 10;
+    }
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen py-10 px-4">
-    <div class="max-w-7xl mx-auto bg-white p-6 rounded shadow">
-        <small class="block font-semibold text-center">Powered by #topu</small>
-        <h1 class="sm:text-3xl xl:text-3xl font-bold text-center mb-6">⚔️ Clash War Planner</h1>
+<body class="min-h-screen bg-[url('images/war_bg.png')] bg-repeat-y text-slate-100" style="background-size: 100%;">
 
-        <h2 id="warType" class="text-center sm:text-4xl xl:text-2xl font-bold mb-4"></h2>
-        <div id="warTimer" class="text-center mt-2 sm:text-3xl xl:text-xl mb-3 font-bold text-blue-700">
-            <!-- Time will be inserted here -->
-        </div>
+  <small class="text-lg block font-semibold fixed bottom-4 right-5">
+    <span class="text-slate-300 font-normal">Powered by </span>
+    #topu
+  </small>
 
-        <div class="flex items-center justify-center gap-10 sm:mt-8 mb-6">
-
-            <!-- Clan Info -->
-            <div id="clanInfo" class="text-center hidden">
-                <img id="clanBadge" class="sm:w-36 sm:h-36 xl:w-16 xl:h-16 mx-auto"
-                    src="https://api-assets.clashofclans.com/badges/200/I8we-LqZafK7py1EUYSDZTiq-OEyeD05mEobDJJ6ytI.png">
-                <h2 id="clanName" class="sm:text-3xl xl:text-xl font-semibold mt-2">ThE DeViLs</h2>
-                <p class="text-lg text-gray-600" id="clanLevel">Level 13</p>
-
-                <p class="sm:text-3xl xl:text-xl text-gray-600 mt-4" id="ourStars">0.00% ⭐ 0/90</p>
-                <p class="sm:text-3xl xl:text-xl text-gray-600 mt-4" id="ourAttacks">0 ⚔️ 30</p>
-            </div>
-
-            <!-- VS Text -->
-            <div class="text-2xl font-bold text-gray-700 hidden" id="warVersas">VS</div>
-
-            <!-- Opponent Info -->
-            <div id="warInfo" class="text-center hidden">
-                <img id="opponentBadge" class="sm:w-36 sm:h-36 xl:w-16 xl:h-16 mx-auto mb-2"
-                    src="https://api-assets.clashofclans.com/badges/200/rmF1n2w4lxV8sqULGrSCsAh3zs4SEqk1YZNw56LGbj8.png">
-                <h2 class="text-gray-600 sm:text-3xl xl:text-xl font-semibold" id="opponentName">⚜️Boro✖️Boys⚜️</h2>
-                <p class="text-lg text-gray-600" id="enemyClanLevel">Level 9</p>
-
-                <p class="sm:text-3xl xl:text-xl text-gray-600 mt-4" id="enemyStars">31.27% ⭐ 23/90</p>
-                <p class="sm:text-3xl xl:text-xl text-gray-600 mt-4" id="enemyAttacks">12 ⚔️ 30</p>
-            </div>
-        </div>
-
-        <!-- Attack Planner -->
-        <div id="plannerWrapper" class="hidden">
-            <h3 class="text-lg font-bold mb-2">📝 Attack Planner</h3>
-            <div class="overflow-x-auto">
-                <table class="table-auto w-full border border-gray-300 text-sm">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="p-2 border text-lg font-semibold sm:w-[35%] xl:w-[25%]">Clan</th>
-                            <th class="p-2 border text-lg font-semibold min-w-[180px]">War Attack</th>
-                            <th class="p-2 border text-lg font-semibold min-w-[100px]">Opponent</th>
-                            <th class="p-2 border text-lg font-semibold min-w-[160px]">Attack Suggestion</th>
-                            <th class="p-2 border text-lg font-semibold attack-note-1 min-w-[100px]">#1 Note</th>
-                            <th class="p-2 border text-lg font-semibold attack-note-2 min-w-[100px]">#2 Note</th>
-                        </tr>
-                    </thead>
-                    <tbody id="plannerTableBody"></tbody>
-                </table>
-            </div>
-        </div>
+  <div
+    class="max-w-xl md:max-w-[42rem] lg:max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto p-4 md:p-8 fixed left-1/2 -translate-x-1/2 z-[99] w-full">
+    <div id="war-type-container"
+      class="absolute hidden bottom-0 md:bottom-2 xl:bottom-2 left-1/2 -translate-x-1/2 z-[2] bg-slate-800/70 px-4 py-1.5 rounded-lg border-white/50 border-2">
+      <h2 id="war-type" class="text-sm md:text-lg lg:text-xl font-bold text-amber-400">Clan War League</h2>
     </div>
 
-    <script src="script.js"></script>
+
+    <!-- Header -->
+    <div
+      class="relative rounded-3xl bg-black/60 border border-2 border-slate-100/60 bg-[linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02))] shadow-xl">
+      <div class="absolute inset-0 pointer-events-none" aria-hidden>
+        <div class="absolute -top-20 -left-20 w-72 h-72 bg-emerald-500/10 blur-3xl rounded-full"></div>
+        <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-fuchsia-500/10 blur-3xl rounded-full"></div>
+      </div>
+
+      <div class="grid grid-cols-5 items-center gap-3 xl:gap-6 p-6 xl:p-4 relative">
+        <!-- Left clan -->
+        <div class="col-span-2 space-y-3" id="my-clan-info">
+          <img id="my-clan-badge"
+            class="w-8 sm:w-20 sm:absolute sm:-left-[40px] md:w-24 md:absolute md:-left-[45px] top-0 grid"
+            src="https://api-assets.clashofclans.com/badges/200/mgJA1X_j1G6xd8CG5kvLSIjzYPkAHchpcpRITQ1LxGE.png" alt="">
+
+          <div class="flex items-start gap-3 !mt-0">
+            <div class="w-[100%] xl:w-3/4 pl-0 sm:pl-4 md:pl-6 xl:pl-12">
+              <div id="my-clan-tag" class="text-[8px] sm:text-xs xl:text-xs text-slate-300/70">#clan-tag</div>
+              <div id="my-clan-name"
+                class="title text-[11px] sm:text-2xl md:text-2xl xl:text-3xl font-bold tracking-wide mb-2 overflow-hidden truncate">
+                Clan Name</div>
+
+              <!-- Progress -->
+              <div class="flex flex-col items-start gap-0">
+                <div class="w-full relative">
+                  <div class="star text-amber-300 absolute z-[9] -left-2 -top-1.5 md:-left-4 md:-top-3.5 shadow-2xl">
+                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-6 md:w-12 h-6 md:h-12 fill-amber-300">
+                      <path fill-rule="evenodd"
+                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </div>
+
+                  <div class="w-full bg-slate-200/20 relative h-4 md:h-6 rounded-md overflow-hidden">
+                    <span class="absolute right-2 font-bold text-xs md:text-[16px] md:pt-1"
+                      id="my-clan-total-stars">0</span>
+                    <div class="h-full bg-amber-600" id="my-clan-total-star-percentage" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <svg viewBox="0 0 290.226 290.226" class="w-3 h-3 text-slate-200" xmlns="http://www.w3.org/2000/svg">
+                    <g>
+                      <path
+                        d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25C70.842,245.679,66.698,248.629,63.951,243.575z"
+                        fill="currentColor" />
+                      <path
+                        d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"
+                        fill="currentColor" />
+                      <path
+                        d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002L100.985,182.318z"
+                        fill="currentColor" />
+                    </g>
+                  </svg>
+
+                  <span class="title text-xs sm:text-sm lg:text-lg xl:text-lg font-bold"
+                    id="my-clan-total-atk-count-details">0 / 0</span>
+                </div>
+              </div>
+              <!-- Progress -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Center status -->
+        <div class="text-center hidden" id="center-info">
+          <div class="title text-lg font-bold uppercase tracking-widest text-amber-400/80">VS</div>
+          <div class="title text-lg lg:text-2xl xl:text-4xl font-bold text-rose-500 drop-shadow leading-[18px]"
+            id="war-timer-element">0m</div>
+          <div class="title text-xs md:text-sm uppercase tracking-widest text-slate-300/80" id="war-timer-label">Battle
+            Day</div>
+        </div>
+
+        <!-- Right clan -->
+        <div class="col-span-2 space-y-3 hidden" id="oponent-clan-info">
+          <img id="oponent-clan-badge"
+            class="w-8 sm:w-20 block ml-auto sm:absolute sm:-right-[40px] md:w-24 md:absolute md:-right-[45px] top-0 grid"
+            src="https://api-assets.clashofclans.com/badges/200/mgJA1X_j1G6xd8CG5kvLSIjzYPkAHchpcpRITQ1LxGE.png" alt="">
+
+          <div class="flex items-start justify-end gap-3 !mt-0">
+            <div class="w-[100%] xl:w-3/4 pr-0 sm:pr-4 md:pr-6 xl:pr-12">
+              <div id="oponent-clan-tag" class="text-[8px] sm:text-xs xl:text-xs text-slate-300/70 text-right">#clan-tag
+              </div>
+              <div id="oponent-clan-name"
+                class="title text-[11px] sm:text-2xl md:text-2xl xl:text-3xl font-bold tracking-wide mb-2 overflow-hidden truncate text-right">
+                Clan
+                Name</div>
+              <!-- <div class="text-xs text-slate-300/70">Lvl 14 Clan</div> -->
+
+              <!-- Progress -->
+              <div class="flex flex-col items-end gap-0">
+                <div class="w-full relative">
+                  <div class="star text-amber-300 absolute z-[9] -right-2 -top-1.5 md:-right-4 md:-top-3.5 shadow-2xl">
+                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 md:w-12 md:h-12 fill-amber-300">
+                      <path fill-rule="evenodd"
+                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </div>
+
+                  <div class="w-full bg-slate-200/20 relative h-4 md:h-6 rounded-md overflow-hidden rotate-180">
+                    <span class="absolute right-2 rotate-180 font-bold text-xs md:text-[16px] md:pb-1"
+                      id="oponent-clan-total-stars">0</span>
+                    <div class="h-full bg-amber-600 text-center" id="oponent-clan-total-star-percentage"
+                      style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 mt-1.5">
+                  <span class="title text-xs sm:text-sm lg:text-lg xl:text-lg font-bold"
+                    id="oponent-clan-total-atk-count-details">0 / 0</span>
+
+                  <svg viewBox="0 0 290.226 290.226" class="w-3 h-3 text-slate-200" xmlns="http://www.w3.org/2000/svg">
+                    <g>
+                      <path
+                        d="M63.951,243.575c-1.945-3.578-4.401-6.907-7.363-9.869c-3.106-3.102-6.626-5.633-10.4-7.63c-4.51-2.387-0.945-7.5-0.945-7.5c4.616-7.023,8.825-14.079,12.305-20.226l-23.363-23.344H11.504c-4.362,0-7.898-3.539-7.898-7.902c0-4.361,3.536-7.9,7.898-7.9h25.947c2.1,0,4.107,0.832,5.588,2.312l85.379,85.291c1.483,1.483,2.315,3.495,2.315,5.589v26.073c0,4.365-3.537,7.897-7.9,7.897c-4.367,0-7.904-3.531-7.904-7.897v-22.798l-23.27-23.24c-6.281,3.707-13.582,8.252-20.816,13.25C70.842,245.679,66.698,248.629,63.951,243.575z"
+                        fill="currentColor" />
+                      <path
+                        d="M26.61,237.102c-7.106,0-13.784,2.764-18.812,7.784c-5.019,5.015-7.782,11.686-7.782,18.778c0,7.097,2.764,13.762,7.782,18.776c5.027,5.016,11.706,7.783,18.812,7.785c7.102,0,13.781-2.77,18.804-7.785c5.023-5.015,7.79-11.682,7.79-18.776c0-7.093-2.768-13.764-7.79-18.778C40.392,239.866,33.712,237.102,26.61,237.102z"
+                        fill="currentColor" />
+                      <path
+                        d="M100.985,182.318c-3.502,3.499-9.232,3.499-12.734,0.001l-8.81-8.801c-3.502-3.498-3.502-9.223,0-12.721L229.832,10.564c3.502-3.498,10.401-6.727,15.33-7.175l36.862-3.352c4.93-0.448,8.596,3.218,8.148,8.148l-3.346,36.791c-0.448,4.93-3.68,11.825-7.182,15.324l-150.4,150.251c-3.502,3.498-9.232,3.498-12.734,0l-8.822-8.813c-3.502-3.498-3.502-9.223,0-12.722L233.608,63.213c1.854-1.848,1.856-4.852,0.003-6.702c-1.848-1.853-4.853-1.853-6.709-0.002L100.985,182.318z"
+                        fill="currentColor" />
+                    </g>
+                  </svg>
+                </div>
+              </div>
+              <!-- Progress -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="min-h-[calc(100vh-206px)] max-w-2xl xl:max-w-4xl mx-auto py-[280px] pt-[250px] md:pt-[290px] text-center relative hidden"
+    id="war-bases-container">
+
+    <!-- separator (middle horizontal line) -->
+    <div class="pointer-events-none absolute inset-y-0 left-1/2 mt-[210px] md:mt-[240px] xl:mt-[240px] -translate-x-1/2 w-[1px] sm:w-[4px] bg-white/30"></div>
+    <!-- separator (middle horizontal line) -->
+
+    <div class="grid grid-cols-2 md:grid-cols-2 px-6 sm:px-12 md:px-0 gap-6 sm:gap-8 xl:gap-20">
+      <!-- My Clan (Left Side) -->
+      <ul class="space-y-16" id="my-clan-member-list-container"></ul>
+
+      <!-- Opponent Clan (Right Side) -->
+      <ul class="space-y-16" id="oponent-clan-member-list-container"></ul>
+    </div>
+  </div>
+
+  <script src="js/svggen.js"></script>
+  <script src="js/drag.js"></script>
+  <script src="js/script.js"></script>
 </body>
 
 </html>
