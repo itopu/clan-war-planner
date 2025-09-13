@@ -96,6 +96,8 @@ $(function () {
             displayClan(clanRes.clan);
             displayWar(warRes.type, warRes.data);
 
+            if (warRes.data.state != "notInWar") { return; }
+
             // Figure out my clan vs enemy
             const myTag = clanRes.clan.tag;
             const isMyClan = warRes.data.clan.tag === myTag;
@@ -108,9 +110,7 @@ $(function () {
             const enemies = normalizeBaseOrder(enemy.members || []);
 
             // ✅ Call AFTER everything is loaded
-            if (warRes.data.state != "notInWar") {
-                buildPlannerTable(members, enemies, warRes.data);                
-            }
+            buildPlannerTable(members, enemies, warRes.data);
 
             // finally unhide UI sections as needed
             elements.centerInfo.removeClass('hidden');
@@ -118,9 +118,7 @@ $(function () {
             elements.warBaseContainer.removeClass('hidden');
             elements.warTypeContainer.removeClass('hidden');
 
-            if (warRes.data.state != "notInWar") {
-                loadDragEverything(members, enemies, warRes.data, strategy);
-            }
+            loadDragEverything(members, enemies, warRes.data, strategy);
         } catch (err) {
             console.log(err);
             console.error("loadEverything failed:", err);
