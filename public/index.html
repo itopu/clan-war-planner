@@ -106,6 +106,16 @@
       pointer-events: none;
       z-index: 10;
     }
+
+    /* swipe-left remove এলিমেন্ট (flag) – vertical scroll allow, horizontal gesture অ্যাপ পাবে */
+    .attacker-flag {
+      touch-action: pan-y;
+    }
+
+    /* ড্র্যাগ সোর্স/টার্গেট – কাস্টম ড্র্যাগে ব্রাউজারের স্ক্রল জেসচার আটকাতে */
+    .war-participator-item .item {
+      touch-action: none;
+    }
   </style>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -264,7 +274,9 @@
     id="war-bases-container">
 
     <!-- separator (middle horizontal line) -->
-    <div class="pointer-events-none absolute inset-y-0 left-1/2 mt-[210px] md:mt-[240px] xl:mt-[240px] -translate-x-1/2 w-[1px] sm:w-[4px] bg-white/30"></div>
+    <div
+      class="pointer-events-none absolute inset-y-0 left-1/2 mt-[210px] md:mt-[240px] xl:mt-[240px] -translate-x-1/2 w-[1px] sm:w-[4px] bg-white/30">
+    </div>
     <!-- separator (middle horizontal line) -->
 
     <div class="grid grid-cols-2 md:grid-cols-2 px-6 sm:px-12 md:px-0 gap-6 sm:gap-8 xl:gap-20">

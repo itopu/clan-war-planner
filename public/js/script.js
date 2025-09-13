@@ -108,7 +108,9 @@ $(function () {
             const enemies = normalizeBaseOrder(enemy.members || []);
 
             // ✅ Call AFTER everything is loaded
-            buildPlannerTable(members, enemies, warRes.data);
+            if (warRes.data.state != "notInWar") {
+                buildPlannerTable(members, enemies, warRes.data);                
+            }
 
             // finally unhide UI sections as needed
             elements.centerInfo.removeClass('hidden');
@@ -116,7 +118,9 @@ $(function () {
             elements.warBaseContainer.removeClass('hidden');
             elements.warTypeContainer.removeClass('hidden');
 
-            loadDragEverything(members, enemies, warRes.data, strategy);
+            if (warRes.data.state != "notInWar") {
+                loadDragEverything(members, enemies, warRes.data, strategy);
+            }
         } catch (err) {
             console.log(err);
             console.error("loadEverything failed:", err);
@@ -131,7 +135,11 @@ $(function () {
     }
 
     function displayWar(type, warData) {
-        elements.warType.text(type === 'cwl' ? 'Clan War League' : 'Regular War');
+        if (warData.state === 'notInWar') {
+            elements.warType.text('Not In War');
+        } else {
+            elements.warType.text(type === 'cwl' ? 'Clan War League' : 'Regular War');
+        }
         elements.warType.attr("data-war-type", type);
 
         elements.oponentClan.name.text(warData.opponent.name || 'Unknown');
@@ -151,6 +159,8 @@ $(function () {
         elements.oponentClan.totalAtkCountDetails.html(`<span class="flex flex-wrap justify-end gap-x-1"><span class="text-md text-white/50">${opponentDestruction}%</span>${warData.opponent.attacks || 0} / ${warData.teamSize}</span>`);
         elements.oponentClan.totalStar.text(`${warData.opponent.stars} / ${warData.teamSize * 3}`);
         elements.oponentClan.totalStarPercentage.css("width", `${opponentDestruction}%`);
+
+        if (warData.state === 'notInWar') { return; }
 
         let countdown = getWarCountdown(warData.preparationStartTime, (type === 'cwl' ? warData.warStartTime : warData.startTime), warData.endTime);
 

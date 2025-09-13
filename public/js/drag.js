@@ -1,8 +1,8 @@
 async function loadDragEverything(members, enemyClan, warData, strategy) {
     // ===== Config =====
-    const MAX_PER_ATTACKER = elements.warType.data('war-type') === 'cwl' ? 2 : 2;
-    const MAX_PER_DEFENDER = elements.warType.data('war-type') === 'cwl' ? 2 : 2;
-    const REMOVE_THRESHOLD = 60;           // swipe/drag-left ≥ 60px => remove
+    const MAX_PER_ATTACKER = elements.warType.data('war-type') === 'cwl' ? 1 : 2;
+    const MAX_PER_DEFENDER = elements.warType.data('war-type') === 'cwl' ? 1 : 2;
+    const REMOVE_THRESHOLD = (isTouchLike() ? 40 : 60);           // swipe/drag-left ≥ 60px => remove
     const ASSIGNED_EVENT = "war:assigned";
     const MODIFY_EVENT = "war:assign-modify";
     // ===== Config =====
@@ -375,4 +375,109 @@ async function loadDragEverything(members, enemyClan, warData, strategy) {
     $(document).on(MODIFY_EVENT, function (_e, data) {
         saveStrategy(data);
     });
+
+
+    // ===== Feature detect: মোবাইলে নেটিভ DnD এড়াই =====
+    function isTouchLike(e) {
+        const nav = window.navigator || {};
+        return ('maxTouchPoints' in nav ? nav.maxTouchPoints > 0 : 'ontouchstart' in window);
+    }
+
+    // Opponent টার্গেট খোঁজার ইউটিল (drop hit-test)
+    function getDropTargetAt(x, y) {
+        const el = document.elementFromPoint(x, y);
+        if (!el) return null;
+        return $(el).closest('#oponent-clan-member-list-container .war-participator-item .item')[0] || null;
+    }
+
+    // ফলোয়ার ঘোস্ট তৈরি
+    function makeFollower(labelText) {
+        const el = document.createElement('div');
+        el.className = 'drag-follower';
+        el.style.position = 'fixed';
+        el.style.left = '0';
+        el.style.top = '0';
+        el.style.pointerEvents = 'none';
+        el.style.zIndex = '9999';
+        el.style.padding = '4px 8px';
+        el.style.borderRadius = '8px';
+        el.style.fontSize = '12px';
+        el.style.background = 'rgba(0,0,0,0.7)';
+        el.style.color = '#fff';
+        el.style.whiteSpace = 'nowrap';
+        el.textContent = labelText || '';
+        document.body.appendChild(el);
+        return el;
+    }
+
+    function enableMobileTouchDrag($items) {
+        let dragging = false, follower = null, payload = null;
+
+        $items.each(function () {
+            const node = this;
+
+            node.addEventListener('pointerdown', (e) => {
+                // শুধু touch/pen fallback
+                if (e.pointerType === 'mouse') return;
+                dragging = true;
+
+                const $it = $(node);
+                const attackerPosition = $it.data('attacker-position') || 0;
+                const attackerName =
+                    $it.data('attacker-name') || $.trim($it.find('p').text());
+
+                payload = {
+                    attackerTag: $it.data('attacker-tag') || null,
+                    attackerName,
+                    attackerPosition
+                };
+
+                follower = makeFollower(`#${attackerPosition} ${attackerName}`);
+                // স্পর্শ ধরে রাখি
+                node.setPointerCapture && node.setPointerCapture(e.pointerId);
+            }, { passive: true });
+
+            node.addEventListener('pointermove', (e) => {
+                if (!dragging || e.pointerType === 'mouse') return;
+                if (follower) {
+                    follower.style.transform = `translate(${e.clientX + 8}px, ${e.clientY + 8}px)`;
+                }
+            }, { passive: true });
+
+            const endDrag = (e) => {
+                if (!dragging || e.pointerType === 'mouse') return;
+                dragging = false;
+
+                // drop target detect
+                const dropNode = getDropTargetAt(e.clientX, e.clientY);
+                if (dropNode && payload) {
+                    const $target = $(dropNode);
+                    // পুরনো flag সরান (একটাই রাখতে চাইলে)
+                    $target.find(".war-flag").remove();
+
+                    // নতুন flag বসান
+                    appendAttacker($target, {
+                        attackerTag: payload.attackerTag,
+                        attackerPosition: payload.attackerPosition,
+                        attackerName: payload.attackerName
+                    });
+                }
+
+                if (follower) { follower.remove(); follower = null; }
+                payload = null;
+
+                node.releasePointerCapture && node.releasePointerCapture(e.pointerId);
+            };
+
+            node.addEventListener('pointerup', endDrag);
+            node.addEventListener('pointercancel', endDrag);
+        });
+    }
+
+    // কেবল টাচ ডিভাইসে fallback চালু করুন
+    if (isTouchLike()) {
+        // নেটিভ DnD হুকগুলো রেখে দিয়েছি, কিন্তু মোবাইলে এগুলো কাজ না করলে
+        // এই fallback-টাই কার্যকর হবে
+        enableMobileTouchDrag($myItems);
+    }
 };
