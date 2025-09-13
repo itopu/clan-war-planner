@@ -79,9 +79,9 @@ $(function () {
         try {
             // ---- Parallel fetch (production) ----
             const [clanRes, warRes, strategy] = await Promise.all([
-              $.getJSON('/api/clan'),
-              $.getJSON('/api/currentwar'),
-              $.getJSON('/api/attack-strategy')
+                $.getJSON('/api/clan'),
+                $.getJSON('/api/currentwar'),
+                $.getJSON('/api/attack-strategy')
             ]);
 
             // ---- Dev/static fallback (now) ----
@@ -96,29 +96,29 @@ $(function () {
             displayClan(clanRes.clan);
             displayWar(warRes.type, warRes.data);
 
-            if (warRes.data.state != "notInWar") { return; }
+            if (warRes.data.state != "notInWar") {
+                // Figure out my clan vs enemy
+                const myTag = clanRes.clan.tag;
+                const isMyClan = warRes.data.clan.tag === myTag;
+                const myClan = isMyClan ? warRes.data.clan : warRes.data.opponent;
+                const enemy = isMyClan ? warRes.data.opponent : warRes.data.clan;
 
-            // Figure out my clan vs enemy
-            const myTag = clanRes.clan.tag;
-            const isMyClan = warRes.data.clan.tag === myTag;
-            const myClan = isMyClan ? warRes.data.clan : warRes.data.opponent;
-            const enemy = isMyClan ? warRes.data.opponent : warRes.data.clan;
+                // Attach trophies, normalize orders
+                const updatedMyClan = attachTrophiesToMyClan(myClan, clanRes);
+                const members = normalizeBaseOrder(updatedMyClan.members || []);
+                const enemies = normalizeBaseOrder(enemy.members || []);
 
-            // Attach trophies, normalize orders
-            const updatedMyClan = attachTrophiesToMyClan(myClan, clanRes);
-            const members = normalizeBaseOrder(updatedMyClan.members || []);
-            const enemies = normalizeBaseOrder(enemy.members || []);
+                // ✅ Call AFTER everything is loaded
+                buildPlannerTable(members, enemies, warRes.data);
 
-            // ✅ Call AFTER everything is loaded
-            buildPlannerTable(members, enemies, warRes.data);
+                // finally unhide UI sections as needed
+                elements.centerInfo.removeClass('hidden');
+                elements.oponentClanInfo.removeClass('hidden');
+                elements.warBaseContainer.removeClass('hidden');
+                elements.warTypeContainer.removeClass('hidden');
 
-            // finally unhide UI sections as needed
-            elements.centerInfo.removeClass('hidden');
-            elements.oponentClanInfo.removeClass('hidden');
-            elements.warBaseContainer.removeClass('hidden');
-            elements.warTypeContainer.removeClass('hidden');
-
-            loadDragEverything(members, enemies, warRes.data, strategy);
+                loadDragEverything(members, enemies, warRes.data, strategy);
+            }
         } catch (err) {
             console.log(err);
             console.error("loadEverything failed:", err);
